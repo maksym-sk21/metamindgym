@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}{{ course.title }} — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="flex flex-col" style="height: calc(100vh - 65px);">
+
+    <div class="flex items-center justify-between px-6 py-3 border-b border-gray-800 bg-gray-950 shrink-0">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'accounts:dashboard' %}" class="text-gray-500 hover:text-white transition text-sm">
+                ← Мои курсы
+            </a>
+            <span class="text-gray-700">|</span>
+            <span class="text-sm font-medium text-white">{{ course.title }}</span>
+        </div>
+        <span class="text-xs text-gray-600">MetaMindGym</span>
+    </div>
+
+    {% if course.tilda_path %}
+        <iframe
+            src="{{ MEDIA_URL }}{{ course.tilda_path }}"
+            class="w-full flex-1 border-0"
+            allowfullscreen>
+        </iframe>
+    {% else %}
+        <div class="flex-1 flex items-center justify-center text-center">
+            <div>
+                <div class="text-5xl mb-4">🚧</div>
+                <h2 class="text-xl font-semibold mb-2">Контент скоро будет</h2>
+                <p class="text-gray-400 text-sm">Материалы курса ещё не загружены.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

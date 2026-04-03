@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Запланировать встречу — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <div class="mb-6 sm:mb-8">
+        <a href="{% url 'courses:course_detail' course.id %}" class="text-gray-400 hover:text-dark transition text-sm">← {{ course.title }}</a>
+    </div>
+
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-8">
+        <h1 class="text-xl sm:text-2xl font-bold text-dark mb-1">Запланировать встречу</h1>
+        <p class="text-gray-400 text-sm mb-7 sm:mb-8">Урок: <span class="text-dark font-medium">{{ lesson.title }}</span></p>
+
+        {% if existing_meeting %}
+            <div class="text-center py-6">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-4 text-xl sm:text-2xl">✓</div>
+                <p class="font-semibold text-dark mb-1">Встреча запланирована</p>
+                <p class="text-gray-400 text-sm">{{ existing_meeting.slot.date }} в {{ existing_meeting.slot.time }}</p>
+                <span class="inline-block mt-3 text-xs px-3 py-1 rounded-full border
+                    {% if existing_meeting.status == 'confirmed' %}border-green-200 text-green-600 bg-green-50
+                    {% elif existing_meeting.status == 'cancelled' %}border-red-200 text-red-500 bg-red-50
+                    {% else %}border-border-main text-gray-500 bg-surface-2{% endif %}">
+                    {{ existing_meeting.get_status_display }}
+                </span>
+            </div>
+
+        {% elif slots %}
+            <form method="POST" class="space-y-5 sm:space-y-6">
+                {% csrf_token %}
+
+                <div>
+                    <label class="block text-sm text-gray-500 mb-3">Выбери дату</label>
+                    <div id="date-buttons" class="flex flex-wrap gap-2">
+                        {% for slot in slots %}
+                            <button type="button"
+                                onclick="selectDate('{{ slot.date }}')"
+                                data-date="{{ slot.date }}"
+                                class="date-btn px-3 sm:px-4 py-2 border border-border-main rounded-lg text-sm hover:border-gray-400 text-gray-500 hover:text-dark transition bg-surface-2">
+                                {{ slot.date }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div id="time-section" class="hidden">
+                    <label class="block text-sm text-gray-500 mb-3">Выбери время</label>
+                    <div id="time-buttons" class="flex flex-wrap gap-2"></div>
+                    <input type="hidden" name="slot_id" id="slot_id">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1.5">Комментарий <span class="text-gray-400">(необязательно)</span></label>
+                    <textarea name="comment" rows="3" placeholder="Что хочешь обсудить?"
+                        class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" disabled
+                    class="w-full bg-dark text-white py-3 rounded-xl font-bold hover:bg-dark-2 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                    Записаться
+                </button>
+            </form>
+
+        {% else %}
+            <div class="text-center py-8">
+                <div class="text-4xl mb-4">📅</div>
+                <p class="text-gray-500 font-medium">Свободных слотов пока нет</p>
+                <p class="text-gray-400 text-sm mt-1">Загляни позже</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+const dateSlots = {};
+{% for slot in slots %}
+    if (!dateSlots["{{ slot.date }}"]) dateSlots["{{ slot.date }}"] = [];
+    dateSlots["{{ slot.date }}"].push({ id: {{ slot.id }}, time: "{{ slot.time }}" });
+{% endfor %}
+
+const seen = new Set();
+document.querySelectorAll('.date-btn').forEach(btn => {
+    const date = btn.dataset.date;
+    if (seen.has(date)) { btn.remove(); } else { seen.add(date); }
+});
+
+function selectDate(date) {
+    document.querySelectorAll('.date-btn').forEach(b => {
+        const active = b.dataset.date === date;
+        b.classList.toggle('bg-dark', active);
+        b.classList.toggle('text-white', active);
+        b.classList.toggle('border-dark', active);
+        b.classList.toggle('bg-surface-2', !active);
+        b.classList.toggle('text-gray-500', !active);
+        b.classList.toggle('border-border-main', !active);
+    });
+
+    const timeSection = document.getElementById('time-section');
+    const timeButtons = document.getElementById('time-buttons');
+    timeSection.classList.remove('hidden');
+    timeButtons.innerHTML = '';
+    document.getElementById('slot_id').value = '';
+    document.getElementById('submit-btn').disabled = true;
+
+    (dateSlots[date] || []).forEach(slot => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = slot.time;
+        btn.dataset.slotId = slot.id;
+        btn.className = 'px-4 py-2 border border-border-main rounded-lg text-sm hover:border-gray-400 text-gray-500 hover:text-dark transition bg-surface-2';
+        btn.onclick = () => selectTime(slot.id, btn);
+        timeButtons.appendChild(btn);
+    });
+}
+
+function selectTime(slotId, btn) {
+    document.querySelectorAll('#time-buttons button').forEach(b => {
+        b.className = 'px-4 py-2 border border-border-main rounded-lg text-sm hover:border-gray-400 text-gray-500 hover:text-dark transition bg-surface-2';
+    });
+    btn.className = 'px-4 py-2 border border-dark rounded-lg text-sm bg-dark text-white transition';
+    document.getElementById('slot_id').value = slotId;
+    document.getElementById('submit-btn').disabled = false;
+}
+</script>
+{% endblock %}

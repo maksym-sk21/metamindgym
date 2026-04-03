@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Мои курсы — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-4">
+
+    <div class="space-y-4">
+        {% if meetings %}
+        <div class="mt-12">
+            <h2 class="text-lg font-semibold text-dark mb-4">Запланированные встречи</h2>
+            <div class="space-y-3">
+                {% for meeting in meetings %}
+                <div class="bg-white border rounded-2xl px-6 py-4 flex items-center justify-between
+                    {% if meeting.status == 'confirmed' %}border-green-200
+                    {% elif meeting.status == 'cancelled' %}border-red-100 opacity-60
+                    {% else %}border-border-main{% endif %}">
+
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0
+                            {% if meeting.status == 'confirmed' %}bg-green-50
+                            {% elif meeting.status == 'cancelled' %}bg-red-50
+                            {% else %}bg-surface-2{% endif %}">
+                            {% if meeting.status == 'confirmed' %}✓
+                            {% elif meeting.status == 'cancelled' %}✕
+                            {% else %}⏳{% endif %}
+                        </div>
+                        <div>
+                            <div class="font-medium text-dark text-sm">{{ meeting.lesson.course.title }} — {{ meeting.lesson.title }}</div>
+                            <div class="text-gray-400 text-xs mt-0.5">{{ meeting.slot.date }} в {{ meeting.slot.time }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0 ml-4">
+                        <span class="text-xs px-2.5 py-1 rounded-full border
+                            {% if meeting.status == 'confirmed' %}bg-green-50 text-green-600 border-green-200
+                            {% elif meeting.status == 'cancelled' %}bg-red-50 text-red-400 border-red-200
+                            {% else %}bg-surface-2 text-gray-400 border-border-main{% endif %}">
+                            {{ meeting.get_status_display }}
+                        </span>
+                        {% if meeting.status == 'confirmed' and meeting.meet_link %}
+                            <a href="{{ meeting.meet_link }}" target="_blank"
+                                class="bg-dark text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-dark-2 transition">
+                                Войти в встречу →
+                            </a>
+                        {% elif meeting.status == 'confirmed' %}
+                            <span class="text-xs text-gray-400">Ссылка скоро появится</span>
+                        {% endif %}
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    <div class="mb-10">
+        <h1 class="text-3xl font-bold text-dark">Мои курсы</h1>
+        <p class="text-gray-400 mt-1 text-sm">Привет, {{ user.username }}</p>
+    </div>
+
+        {% for course in all_courses %}
+        <div class="border rounded-2xl p-6 flex items-center justify-between transition bg-white
+            {% if course.course_type in accessible %}border-border-main hover:border-gray-400
+            {% else %}border-border-main opacity-60{% endif %}">
+
+            <div class="flex items-center gap-6">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg shrink-0
+                    {% if course.course_type in accessible %}bg-accent text-dark
+                    {% else %}bg-surface-3 text-gray-400{% endif %}">
+                    {% if course.course_type == 'free' %}0
+                    {% elif course.course_type == 'paid_1' %}1
+                    {% elif course.course_type == 'paid_2' %}2
+                    {% elif course.course_type == 'paid_3' %}3
+                    {% else %}4{% endif %}
+                </div>
+                <div>
+                    {% if course.course_type == 'free' %}
+                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Бесплатно</div>
+                    {% else %}
+                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Курс</div>
+                    {% endif %}
+                    <h3 class="font-semibold text-lg text-dark">{{ course.title }}</h3>
+                    <p class="text-gray-400 text-sm mt-0.5">{{ course.description|truncatechars:80 }}</p>
+                </div>
+            </div>
+
+            <div class="shrink-0 ml-6">
+                {% if course.course_type in accessible %}
+                    <a href="{% url 'courses:course_detail' course.id %}"
+                        class="bg-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-dark-2 transition">
+                        Открыть
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:checkout' course.id %}"
+                        class="border border-border-main px-5 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:border-gray-400 hover:text-dark transition">
+                        Купить — €{{ course.price }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MetaMindGym{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        accent: '#F0DD49',
+                        'accent-dark': '#d4c230',
+                        'accent-light': '#fdf9d0',
+                        dark: '#1a1a1a',
+                        'dark-2': '#2a2a2a',
+                        'surface': '#ffffff',
+                        'surface-2': '#f5f5f5',
+                        'surface-3': '#eeeeee',
+                        'border-main': '#e0e0e0',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f5f5f5; }
+        .accent-glow { box-shadow: 0 0 24px rgba(240, 221, 73, 0.4); }
+    </style>
+</head>
+<body class="bg-surface-2 text-dark min-h-screen">
+
+    <nav class="border-b border-border-main px-4 sm:px-6 py-4 bg-white sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <a href="{% url 'accounts:landing' %}" class="text-xl font-bold tracking-tight text-dark shrink-0">
+                Meta<span class="text-dark" style="background: #F0DD49; padding: 0 4px; border-radius: 4px;">Mind</span>Gym
+            </a>
+
+            <!-- Desktop nav -->
+            <div class="hidden sm:flex gap-6 items-center">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:dashboard' %}" class="text-gray-500 hover:text-dark transition text-sm">Мои курсы</a>
+                    <a href="{% url 'accounts:account' %}" class="text-gray-500 hover:text-dark transition text-sm">Аккаунт</a>
+                    {% if user.is_site_admin %}
+                        <a href="{% url 'accounts:admin_panel' %}" class="text-sm font-medium px-3 py-1.5 rounded-lg bg-accent text-dark hover:bg-accent-dark transition">Админ</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:logout' %}" class="text-gray-400 hover:text-dark transition text-sm">Выйти</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="text-gray-500 hover:text-dark transition text-sm">Войти</a>
+                    <a href="{% url 'accounts:register' %}" class="bg-accent text-dark px-4 py-2 rounded-lg font-semibold text-sm hover:bg-accent-dark transition">
+                        Начать бесплатно
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile hamburger -->
+            <button onclick="toggleMobileMenu()" class="sm:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-surface-2 transition" aria-label="Меню">
+                <span id="hb1" class="block w-5 h-0.5 bg-dark transition-all duration-300"></span>
+                <span id="hb2" class="block w-5 h-0.5 bg-dark transition-all duration-300"></span>
+                <span id="hb3" class="block w-5 h-0.5 bg-dark transition-all duration-300"></span>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div id="mobile-menu" class="sm:hidden hidden border-t border-border-main mt-4 pt-4 pb-2 space-y-1">
+            {% if user.is_authenticated %}
+                <a href="{% url 'accounts:dashboard' %}" class="block px-3 py-2.5 rounded-lg text-gray-600 hover:bg-surface-2 hover:text-dark transition text-sm">Мои курсы</a>
+                <a href="{% url 'accounts:account' %}" class="block px-3 py-2.5 rounded-lg text-gray-600 hover:bg-surface-2 hover:text-dark transition text-sm">Аккаунт</a>
+                {% if user.is_site_admin %}
+                    <a href="{% url 'accounts:admin_panel' %}" class="block px-3 py-2.5 rounded-lg bg-accent text-dark font-medium text-sm">Админ</a>
+                {% endif %}
+                <a href="{% url 'accounts:logout' %}" class="block px-3 py-2.5 rounded-lg text-gray-400 hover:bg-surface-2 hover:text-dark transition text-sm">Выйти</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="block px-3 py-2.5 rounded-lg text-gray-600 hover:bg-surface-2 hover:text-dark transition text-sm">Войти</a>
+                <a href="{% url 'accounts:register' %}" class="block px-3 py-2.5 rounded-lg bg-accent text-dark font-semibold text-sm text-center mt-2">Начать бесплатно</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-lg mb-2 text-sm border
+                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700
+                    {% else %}bg-green-50 border-green-200 text-green-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const hb1 = document.getElementById('hb1');
+        const hb2 = document.getElementById('hb2');
+        const hb3 = document.getElementById('hb3');
+        const isOpen = !menu.classList.contains('hidden');
+        menu.classList.toggle('hidden');
+        if (!isOpen) {
+            hb1.style.transform = 'translateY(8px) rotate(45deg)';
+            hb2.style.opacity = '0';
+            hb3.style.transform = 'translateY(-8px) rotate(-45deg)';
+        } else {
+            hb1.style.transform = '';
+            hb2.style.opacity = '';
+            hb3.style.transform = '';
+        }
+    }
+    </script>
+</body>
+</html>

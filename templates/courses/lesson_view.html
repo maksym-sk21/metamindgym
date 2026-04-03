@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% block title %}{{ lesson.title }} — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="flex flex-col">
+
+    <!-- Шапка урока (sticky) -->
+    <div class="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 border-b border-border-main bg-white shrink-0 gap-2 sticky top-[57px] z-30">
+
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <a href="{% url 'courses:course_detail' course.id %}" class="text-gray-400 hover:text-dark transition text-xs sm:text-sm shrink-0">
+                ←
+            </a>
+            <span class="text-sm font-medium text-dark truncate">{{ lesson.title }}</span>
+            <button onclick="toggleSidebar()" id="sidebar-toggle"
+                class="hidden sm:block text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition shrink-0">
+                ☰ Уроки
+            </button>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+            {% if lesson.videos.exists and lesson.tilda_path %}
+            <div class="flex items-center bg-surface-2 rounded-lg p-0.5 border border-border-main">
+                <button id="tab-video" onclick="showVideo()"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition bg-white text-dark shadow-sm border border-border-main">
+                    <span>▶</span>
+                    <span class="hidden sm:inline">Видео</span>
+                </button>
+                <button id="tab-theory" onclick="showTheory()"
+                    class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition text-gray-500 hover:text-dark">
+                    <span>📖</span>
+                    <span class="hidden sm:inline">Теория</span>
+                </button>
+            </div>
+            {% endif %}
+
+            <a href="{% url 'courses:book_meeting' course.id lesson.id %}"
+                class="text-xs border border-border-main px-2.5 sm:px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition whitespace-nowrap">
+                <span class="hidden sm:inline">Запланировать встречу</span>
+                <span class="sm:hidden">📅</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Layout: сайдбар + контент -->
+    <div class="flex">
+
+        <!-- Сайдбар (desktop only) — sticky, собственный скролл -->
+        <div id="sidebar"
+            data-open="true"
+            class="hidden sm:block border-r border-border-main shrink-0 bg-white sticky top-[105px] self-start h-[calc(100vh-105px)] overflow-y-auto"
+            style="width: 256px; transition: width 0.3s ease, overflow 0.3s ease;">
+            <div class="px-4 py-3 text-xs text-gray-400 uppercase tracking-wider border-b border-border-main font-medium whitespace-nowrap">
+                Уроки курса
+            </div>
+            {% for l in lessons %}
+            <a href="{% url 'courses:lesson_view' course.id l.id %}"
+                class="flex items-center gap-3 px-4 py-3 border-b border-surface-2 hover:bg-surface-2 transition
+                {% if l.id == lesson.id %}bg-accent-light border-l-2 border-l-dark{% endif %}">
+                <span class="text-gray-400 text-xs font-mono w-4 shrink-0">{{ l.order }}</span>
+                <span class="text-sm {% if l.id == lesson.id %}text-dark font-medium{% else %}text-gray-500{% endif %}">
+                    {{ l.title }}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Правая часть -->
+        <div class="flex-1 min-w-0">
+
+            <!-- ══════════════════════════════════════════
+                 БЛОК ВИДЕО
+            ══════════════════════════════════════════ -->
+            {% with videos=lesson.videos.all %}
+            {% if videos %}
+            <div id="video-block">
+
+                {% if videos|length > 1 %}
+                <!-- Несколько видео: плеер + список -->
+                <div class="bg-black">
+                    <!-- Desktop: плеер слева, список справа -->
+                    <div class="hidden sm:flex" style="height: 560px;">
+                        <div class="flex-1 overflow-hidden">
+                            <video id="main-player"
+                                class="w-full h-full object-contain"
+                                controls preload="metadata"
+                                src="{{ videos.0.video_file.url }}">
+                                Ваш браузер не поддерживает видео.
+                            </video>
+                        </div>
+                        <div class="w-72 shrink-0 flex flex-col border-l border-gray-800 overflow-y-auto" style="background:#111111;">
+                            <div class="px-4 py-3 border-b border-gray-800 shrink-0">
+                                <p class="text-white text-sm font-semibold">{{ lesson.title }}</p>
+                                <p class="text-gray-500 text-xs mt-0.5">{{ videos|length }} видео</p>
+                            </div>
+                            {% for video in videos %}
+                            <button onclick="switchVideo('{{ video.video_file.url }}', '{{ video.title|escapejs }}', '{{ video.description|escapejs }}', this)"
+                                class="video-tab w-full text-left px-4 py-3 border-b border-gray-800 hover:bg-gray-800 transition flex items-start gap-3 shrink-0
+                                {% if forloop.first %}bg-gray-800{% endif %}">
+                                <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 mt-0.5
+                                    {% if forloop.first %}bg-accent text-dark{% else %}bg-gray-700 text-gray-400{% endif %}">
+                                    {{ forloop.counter }}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-white text-xs font-medium leading-snug">{{ video.title }}</p>
+                                </div>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Mobile: плеер на всю ширину -->
+                    <div class="sm:hidden">
+                        <video id="main-player-mobile"
+                            class="w-full object-contain bg-black"
+                            style="max-height: 56vw; min-height: 200px;"
+                            controls preload="metadata"
+                            src="{{ videos.0.video_file.url }}">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                        <!-- Mobile: горизонтальные табы -->
+                        <div class="flex gap-2 overflow-x-auto px-3 py-2.5 border-t border-gray-800" style="background:#111111;">
+                            {% for video in videos %}
+                            <button onclick="switchVideoMobile('{{ video.video_file.url }}', '{{ video.title|escapejs }}', '{{ video.description|escapejs }}', this)"
+                                class="video-tab-mobile shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs transition
+                                {% if forloop.first %}border-white text-white bg-gray-800{% else %}border-gray-700 text-gray-400{% endif %}">
+                                <span class="font-mono">{{ forloop.counter }}</span>
+                                <span>{{ video.title }}</span>
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- Одно видео -->
+                <div class="bg-black">
+                    <!-- Desktop -->
+                    <div class="hidden sm:block">
+                        <video id="main-player"
+                            class="w-full object-contain"
+                            style="max-height: 65vh;"
+                            controls preload="metadata"
+                            src="{{ videos.0.video_file.url }}">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    </div>
+                    <!-- Mobile -->
+                    <div class="sm:hidden">
+                        <video id="main-player-mobile"
+                            class="w-full object-contain"
+                            style="max-height: 56vw; min-height: 200px;"
+                            controls preload="metadata"
+                            src="{{ videos.0.video_file.url }}">
+                            Ваш браузер не поддерживает видео.
+                        </video>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Описание под плеером (общее для одного видео, или переключаемое) -->
+                <div class="bg-white border-b border-border-main">
+                    <div class="px-4 sm:px-6 py-4 sm:py-5">
+                        <p id="current-video-title" class="text-sm font-semibold text-dark">
+                            {{ videos.0.title }}
+                        </p>
+                        {% if videos.0.description %}
+                        <p id="current-video-desc" class="text-sm text-gray-500 mt-2 leading-relaxed">
+                            {{ videos.0.description }}
+                        </p>
+                        {% else %}
+                        <p id="current-video-desc" class="text-sm text-gray-500 mt-2 leading-relaxed hidden"></p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- ══════════════════════════════════════════
+                 БЛОК ТИЛЬДЫ
+            ══════════════════════════════════════════ -->
+            {% if lesson.tilda_path %}
+            <div id="tilda-block" class="{% if lesson.videos.exists %}hidden{% endif %}">
+                <iframe
+                    id="tilda-frame"
+                    src="{{ MEDIA_URL }}{{ lesson.tilda_path }}"
+                    class="w-full border-0 block"
+                    style="min-height: 100vh;"
+                    onload="resizeTildaFrame(this)"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            {% elif not lesson.videos.exists %}
+            <div class="flex items-center justify-center text-center bg-surface-2 p-8" style="min-height: 60vh;">
+                <div>
+                    <div class="text-4xl sm:text-5xl mb-4">🚧</div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-dark mb-2">Контент скоро будет</h2>
+                    <p class="text-gray-400 text-sm">Материалы урока ещё не загружены.</p>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+// ── Sidebar toggle (исправлен: отслеживаем состояние через data-атрибут) ──
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const btn = document.getElementById('sidebar-toggle');
+    const isOpen = sidebar.dataset.open === 'true';
+
+    if (isOpen) {
+        sidebar.style.width = '0px';
+        sidebar.style.overflow = 'hidden';
+        sidebar.dataset.open = 'false';
+        btn.textContent = '☰ Показать уроки';
+    } else {
+        sidebar.style.width = '256px';
+        sidebar.style.overflow = 'auto';
+        sidebar.dataset.open = 'true';
+        btn.textContent = '☰ Скрыть уроки';
+    }
+}
+
+// ── Переключение видео/теория ──
+function showTheory() {
+    document.getElementById('video-block')?.classList.add('hidden');
+    document.getElementById('tilda-block')?.classList.remove('hidden');
+    setActiveTab('theory');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showVideo() {
+    document.getElementById('tilda-block')?.classList.add('hidden');
+    document.getElementById('video-block')?.classList.remove('hidden');
+    setActiveTab('video');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function setActiveTab(active) {
+    const tabVideo  = document.getElementById('tab-video');
+    const tabTheory = document.getElementById('tab-theory');
+    if (!tabVideo || !tabTheory) return;
+
+    const activeClasses   = ['bg-white', 'text-dark', 'shadow-sm', 'border', 'border-border-main'];
+    const inactiveClasses = ['text-gray-500', 'hover:text-dark'];
+
+    if (active === 'video') {
+        activeClasses.forEach(c => tabVideo.classList.add(c));
+        inactiveClasses.forEach(c => tabVideo.classList.remove(c));
+        activeClasses.forEach(c => tabTheory.classList.remove(c));
+        inactiveClasses.forEach(c => tabTheory.classList.add(c));
+    } else {
+        activeClasses.forEach(c => tabTheory.classList.add(c));
+        inactiveClasses.forEach(c => tabTheory.classList.remove(c));
+        activeClasses.forEach(c => tabVideo.classList.remove(c));
+        inactiveClasses.forEach(c => tabVideo.classList.add(c));
+    }
+}
+
+// ── Обновить описание под плеером ──
+function updateVideoInfo(title, description) {
+    const titleEl = document.getElementById('current-video-title');
+    const descEl  = document.getElementById('current-video-desc');
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) {
+        if (description) {
+            descEl.textContent = description;
+            descEl.classList.remove('hidden');
+        } else {
+            descEl.textContent = '';
+            descEl.classList.add('hidden');
+        }
+    }
+}
+
+// ── Desktop: переключение видео ──
+function switchVideo(url, title, description, btn) {
+    const player = document.getElementById('main-player');
+    if (player) { player.src = url; player.load(); player.play(); }
+
+    document.querySelectorAll('.video-tab').forEach(el => {
+        el.classList.remove('bg-gray-800');
+        const num = el.querySelector('div');
+        if (num) {
+            num.classList.remove('bg-accent', 'text-dark');
+            num.classList.add('bg-gray-700', 'text-gray-400');
+        }
+    });
+    btn.classList.add('bg-gray-800');
+    const num = btn.querySelector('div');
+    if (num) {
+        num.classList.add('bg-accent', 'text-dark');
+        num.classList.remove('bg-gray-700', 'text-gray-400');
+    }
+
+    updateVideoInfo(title, description);
+}
+
+// ── Mobile: переключение видео ──
+function switchVideoMobile(url, title, description, btn) {
+    const player = document.getElementById('main-player-mobile');
+    if (player) { player.src = url; player.load(); player.play(); }
+
+    document.querySelectorAll('.video-tab-mobile').forEach(el => {
+        el.classList.remove('border-white', 'text-white', 'bg-gray-800');
+        el.classList.add('border-gray-700', 'text-gray-400');
+    });
+    btn.classList.add('border-white', 'text-white', 'bg-gray-800');
+    btn.classList.remove('border-gray-700', 'text-gray-400');
+
+    updateVideoInfo(title, description);
+}
+
+// ── Tilda iframe auto-resize ──
+function resizeTildaFrame(iframe) {
+    try {
+        const resize = () => {
+            const height = iframe.contentWindow.document.documentElement.scrollHeight
+                        || iframe.contentWindow.document.body.scrollHeight;
+            if (height > 200) iframe.style.height = height + 'px';
+        };
+        resize();
+        setTimeout(resize, 1000);
+        setTimeout(resize, 3000);
+    } catch (e) {
+        // cross-origin fallback: min-height: 100vh
+    }
+}
+</script>
+{% endblock %}

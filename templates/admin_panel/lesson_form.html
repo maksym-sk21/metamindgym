@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
+    <div class="mb-6 sm:mb-8">
+        <a href="{% url 'accounts:admin_panel' %}" class="text-gray-400 hover:text-dark transition text-sm">← Панель</a>
+        <h1 class="text-xl sm:text-2xl font-bold text-dark mt-3">{{ title }}</h1>
+        <p class="text-gray-400 text-sm mt-1">Курс: {{ course.title }}</p>
+    </div>
+
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-8">
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">Название урока</label>
+                <input type="text" name="title" value="{{ form.title.value|default:'' }}"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">Описание</label>
+                <textarea name="description" rows="3"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">{{ form.description.value|default:'' }}</textarea>
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">Порядок</label>
+                <input type="number" name="order" value="{{ form.order.value|default:'0' }}"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">ZIP архив (страница Tilda)</label>
+                {% if form.instance.tilda_path %}
+                    <p class="text-green-600 text-xs mb-2">✓ Архив загружен и распакован</p>
+                {% endif %}
+                <input type="file" name="zip_file" accept=".zip"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 text-gray-400 text-sm focus:outline-none focus:border-gray-400 transition">
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="is_active" id="is_active"
+                    {% if form.is_active.value %}checked{% endif %} class="w-4 h-4">
+                <label for="is_active" class="text-sm text-gray-500">Активен</label>
+            </div>
+            <div class="flex flex-wrap gap-3 pt-2">
+                <button type="submit" class="bg-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-dark-2 transition text-sm">
+                    Сохранить
+                </button>
+                <a href="{% url 'accounts:admin_panel' %}" class="border border-border-main px-6 py-3 rounded-xl text-sm text-gray-500 hover:text-dark hover:border-gray-400 transition">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {% if lesson %}
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-8 mt-4 sm:mt-6">
+        <h2 class="text-base font-semibold text-dark mb-5">Видео урока</h2>
+
+        {% if videos %}
+        <div class="space-y-3 mb-6">
+            {% for video in videos %}
+            <div class="flex items-center justify-between bg-surface-2 border border-border-main rounded-xl px-3 sm:px-4 py-3 gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="text-gray-400 text-xs font-mono w-5 shrink-0">{{ video.order }}</span>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-dark truncate">{{ video.title }}</p>
+                        {% if video.description %}
+                        <p class="text-xs text-gray-500 truncate mt-0.5">{{ video.description }}</p>
+                        {% endif %}
+                        <p class="text-xs text-gray-400 truncate">{{ video.video_file.name }}</p>
+                    </div>
+                </div>
+                <form method="POST" action="{% url 'accounts:video_delete' video.pk %}" class="shrink-0">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('Удалить видео?')"
+                        class="text-red-400 hover:text-red-600 text-xs transition py-1 px-2">
+                        Удалить
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-400 text-sm mb-6">Видео ещё не добавлены.</p>
+        {% endif %}
+
+        <div class="border-t border-border-main pt-5">
+            <p class="text-sm text-gray-500 mb-4">Добавить видео</p>
+            <form method="POST" action="{% url 'accounts:video_add' lesson.pk %}" enctype="multipart/form-data" class="space-y-3">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Название</label>
+                    <input type="text" name="title" placeholder="Например: Введение"
+                        class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Описание видео <span class="text-gray-300">(необязательно)</span></label>
+                    <textarea name="description" rows="3" placeholder="Что будет разобрано в этом видео..."
+                        class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Видео файл (mp4)</label>
+                    <input type="file" name="video_file" accept="video/*"
+                        class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 text-gray-400 text-sm focus:outline-none focus:border-gray-400 transition">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-500 mb-1.5">Порядок</label>
+                    <input type="number" name="order" value="{{ videos|length }}"
+                        class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+                </div>
+                <button type="submit"
+                    class="w-full sm:w-auto bg-dark text-white px-5 py-3 rounded-xl font-semibold hover:bg-dark-2 transition text-sm">
+                    + Загрузить видео
+                </button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <p class="mt-4 text-gray-400 text-sm px-1">Сначала сохраните урок, чтобы добавить видео.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

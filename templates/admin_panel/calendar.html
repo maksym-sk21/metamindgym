@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Календарь — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8 sm:mb-10">
+        <div>
+            <a href="{% url 'accounts:admin_panel' %}" class="text-gray-400 hover:text-dark transition text-sm">← Панель</a>
+            <h1 class="text-xl sm:text-2xl font-bold text-dark mt-2">Управление календарём</h1>
+            <p class="text-gray-400 text-sm mt-1">Добавляй свободные слоты — пользователи будут видеть и бронировать их</p>
+        </div>
+        <a href="{% url 'accounts:admin_meetings' %}"
+            class="shrink-0 border border-border-main px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-dark hover:border-gray-400 transition bg-white text-center">
+            Все записи →
+        </a>
+    </div>
+
+    <!-- Добавить слот -->
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-6 mb-5 sm:mb-6">
+        <h2 class="text-base font-semibold text-dark mb-4">Добавить свободный слот</h2>
+        <form method="POST" action="{% url 'accounts:slot_add' %}" class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
+            {% csrf_token %}
+            <div class="flex-1">
+                <label class="block text-sm text-gray-500 mb-1.5">Дата</label>
+                <input type="date" name="date"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div class="flex-1">
+                <label class="block text-sm text-gray-500 mb-1.5">Время начала</label>
+                <input type="time" name="time"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <button type="submit"
+                class="w-full sm:w-auto bg-dark text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-2 transition text-sm">
+                + Добавить слот
+            </button>
+        </form>
+    </div>
+
+    <!-- Список слотов -->
+    <div class="bg-white border border-border-main rounded-2xl overflow-hidden">
+        <div class="px-5 sm:px-6 py-4 border-b border-border-main bg-surface-2">
+            <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Предстоящие слоты</h2>
+        </div>
+
+        <!-- Mobile: cards -->
+        <div class="sm:hidden divide-y divide-surface-2">
+            {% for slot in slots %}
+            <div class="flex items-center justify-between px-5 py-4 gap-3">
+                <div>
+                    <p class="font-medium text-dark text-sm">{{ slot.date }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ slot.time }} · 1 час</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if slot.is_booked %}
+                        <span class="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-2 py-1 rounded-full">Занято</span>
+                    {% else %}
+                        <span class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-1 rounded-full">Свободно</span>
+                        <form method="POST" action="{% url 'accounts:slot_delete' slot.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-400 hover:text-red-600 transition text-xs">✕</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="px-5 py-12 text-center text-gray-400 text-sm">Слотов нет — добавь первый выше</div>
+            {% endfor %}
+        </div>
+
+        <!-- Desktop: table -->
+        <table class="hidden sm:table w-full text-sm">
+            <thead class="border-b border-border-main">
+                <tr class="text-gray-400">
+                    <th class="px-6 py-3 text-left font-medium">Дата</th>
+                    <th class="px-6 py-3 text-left font-medium">Время</th>
+                    <th class="px-6 py-3 text-left font-medium">Длительность</th>
+                    <th class="px-6 py-3 text-left font-medium">Статус</th>
+                    <th class="px-6 py-3 text-left font-medium"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-2">
+                {% for slot in slots %}
+                <tr class="hover:bg-surface-2 transition">
+                    <td class="px-6 py-4 font-medium text-dark">{{ slot.date }}</td>
+                    <td class="px-6 py-4 text-dark">{{ slot.time }}</td>
+                    <td class="px-6 py-4 text-gray-400">1 час</td>
+                    <td class="px-6 py-4">
+                        {% if slot.is_booked %}
+                            <span class="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-2 py-1 rounded-full">Занято</span>
+                        {% else %}
+                            <span class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-1 rounded-full">Свободно</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if not slot.is_booked %}
+                        <form method="POST" action="{% url 'accounts:slot_delete' slot.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-400 hover:text-red-600 transition text-xs">Удалить</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">Слотов нет — добавь первый выше</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

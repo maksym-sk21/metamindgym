@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}Записи на встречи — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+
+    <div class="mb-8 sm:mb-10">
+        <a href="{% url 'accounts:admin_calendar' %}" class="text-gray-400 hover:text-dark transition text-sm">← Календарь</a>
+        <h1 class="text-xl sm:text-2xl font-bold text-dark mt-2">Записи на встречи</h1>
+    </div>
+
+    <!-- Mobile: cards -->
+    <div class="sm:hidden space-y-4">
+        {% for meeting in meetings %}
+        <div class="bg-white border border-border-main rounded-2xl p-5 space-y-4">
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    <p class="font-semibold text-dark text-sm">{{ meeting.user.username }}</p>
+                    <p class="text-xs text-gray-400">{{ meeting.user.email }}</p>
+                </div>
+                <form method="POST" action="{% url 'accounts:meeting_status' meeting.id %}">
+                    {% csrf_token %}
+                    <select name="status" onchange="this.form.submit()"
+                        class="bg-surface-2 border border-border-main rounded-lg px-2 py-1.5 text-xs focus:outline-none text-dark">
+                        <option value="pending" {% if meeting.status == 'pending' %}selected{% endif %}>Ожидает</option>
+                        <option value="confirmed" {% if meeting.status == 'confirmed' %}selected{% endif %}>Подтверждена</option>
+                        <option value="cancelled" {% if meeting.status == 'cancelled' %}selected{% endif %}>Отменена</option>
+                    </select>
+                </form>
+            </div>
+            <div class="text-xs text-gray-500 space-y-1">
+                <p><span class="text-gray-400">Курс:</span> {{ meeting.lesson.course.title }} · {{ meeting.lesson.title }}</p>
+                <p><span class="text-gray-400">Время:</span> {{ meeting.slot.date }} в {{ meeting.slot.time }}</p>
+                {% if meeting.comment %}
+                <p><span class="text-gray-400">Комментарий:</span> {{ meeting.comment|truncatechars:80 }}</p>
+                {% endif %}
+            </div>
+            <form method="POST" action="{% url 'accounts:meeting_link' meeting.id %}">
+                {% csrf_token %}
+                <label class="block text-xs text-gray-500 mb-1.5">Ссылка Google Meet</label>
+                <div class="flex gap-2">
+                    <input type="url" name="meet_link" value="{{ meeting.meet_link }}"
+                        placeholder="https://meet.google.com/..."
+                        class="flex-1 bg-surface-2 border border-border-main rounded-xl px-3 py-2.5 text-xs focus:outline-none text-dark min-w-0">
+                    <button type="submit" class="shrink-0 text-xs bg-dark text-white px-3 py-2.5 rounded-xl hover:bg-dark-2 transition">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% empty %}
+        <div class="bg-white border border-border-main rounded-2xl px-5 py-12 text-center text-gray-400 text-sm">
+            Записей пока нет
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: table -->
+    <div class="hidden sm:block bg-white border border-border-main rounded-2xl overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-surface-2 border-b border-border-main">
+                <tr class="text-gray-400">
+                    <th class="px-4 py-3 text-left font-medium">Пользователь</th>
+                    <th class="px-4 py-3 text-left font-medium">Курс / Урок</th>
+                    <th class="px-4 py-3 text-left font-medium">Дата и время</th>
+                    <th class="px-4 py-3 text-left font-medium">Комментарий</th>
+                    <th class="px-4 py-3 text-left font-medium">Статус</th>
+                    <th class="px-4 py-3 text-left font-medium">Ссылка Meet</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-2">
+                {% for meeting in meetings %}
+                <tr class="hover:bg-surface-2 transition">
+                    <td class="px-4 py-4">
+                        <div class="font-medium text-dark">{{ meeting.user.username }}</div>
+                        <div class="text-gray-400 text-xs">{{ meeting.user.email }}</div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="text-dark">{{ meeting.lesson.course.title }}</div>
+                        <div class="text-gray-400 text-xs">{{ meeting.lesson.title }}</div>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="font-medium text-dark">{{ meeting.slot.date }}</div>
+                        <div class="text-gray-400 text-xs">{{ meeting.slot.time }} — 1 час</div>
+                    </td>
+                    <td class="px-4 py-4 text-gray-400 max-w-xs text-xs">{{ meeting.comment|default:"—"|truncatechars:60 }}</td>
+                    <td class="px-4 py-4">
+                        <form method="POST" action="{% url 'accounts:meeting_status' meeting.id %}">
+                            {% csrf_token %}
+                            <select name="status" onchange="this.form.submit()"
+                                class="bg-surface-2 border border-border-main rounded-lg px-2 py-1.5 text-xs focus:outline-none text-dark">
+                                <option value="pending" {% if meeting.status == 'pending' %}selected{% endif %}>Ожидает</option>
+                                <option value="confirmed" {% if meeting.status == 'confirmed' %}selected{% endif %}>Подтверждена</option>
+                                <option value="cancelled" {% if meeting.status == 'cancelled' %}selected{% endif %}>Отменена</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td class="px-4 py-4">
+                        <form method="POST" action="{% url 'accounts:meeting_link' meeting.id %}">
+                            {% csrf_token %}
+                            <div class="flex gap-2 items-center">
+                                <input type="url" name="meet_link" value="{{ meeting.meet_link }}"
+                                    placeholder="https://meet.google.com/..."
+                                    class="bg-surface-2 border border-border-main rounded-lg px-2 py-1.5 text-xs focus:outline-none w-44 text-dark">
+                                <button type="submit" class="text-xs bg-dark text-white px-2 py-1.5 rounded-lg hover:bg-dark-2 transition">
+                                    Сохранить
+                                </button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-4 py-12 text-center text-gray-400">Записей пока нет</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

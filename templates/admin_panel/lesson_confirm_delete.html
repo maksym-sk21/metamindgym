@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Удалить урок — MetaMindGym{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-6 py-24">
+    <div class="bg-white border border-red-100 rounded-2xl p-8 text-center">
+        <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-6 text-2xl">⚠️</div>
+        <h1 class="text-xl font-bold text-dark mb-3">Удалить урок?</h1>
+        <p class="text-gray-400 text-sm mb-8">Урок <span class="text-dark font-medium">{{ lesson.title }}</span> из курса <span class="text-dark font-medium">{{ course.title }}</span> будет удалён.</p>
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600 transition text-sm">
+                Да, удалить
+            </button>
+        </form>
+        <a href="{% url 'accounts:admin_panel' %}" class="block text-gray-400 hover:text-dark mt-4 text-sm transition">Отмена</a>
+    </div>
+</div>
+{% endblock %}

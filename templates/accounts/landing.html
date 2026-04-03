@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}MetaMindGym — Прокачай свой разум{% endblock %}
+
+{% block content %}
+
+<section class="max-w-6xl mx-auto px-6 py-28 text-center">
+    <div class="inline-block bg-accent text-dark text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wider uppercase">
+        Mental Fitness Platform
+    </div>
+    <h1 class="text-6xl font-bold mb-6 leading-tight tracking-tight text-dark">
+        Прокачай свой разум
+    </h1>
+    <p class="text-xl text-gray-500 mb-10 max-w-xl mx-auto leading-relaxed">
+        Курсы по развитию мышления, продуктивности и mental fitness. Первый курс — бесплатно.
+    </p>
+    <div class="flex gap-4 justify-center">
+        <a href="{% url 'accounts:register' %}"
+            class="bg-dark text-white px-8 py-3.5 rounded-lg font-bold text-base hover:bg-dark-2 transition">
+            Начать бесплатно
+        </a>
+        <a href="#courses"
+            class="border border-border-main px-8 py-3.5 rounded-lg font-medium text-base text-gray-500 hover:text-dark hover:border-gray-400 transition bg-white">
+            Узнать больше
+        </a>
+    </div>
+</section>
+
+<section id="courses" class="max-w-6xl mx-auto px-6 py-16 border-t border-border-main">
+    <h2 class="text-3xl font-bold mb-3 text-dark">Курсы</h2>
+    <p class="text-gray-400 mb-12">Выбери свой путь развития</p>
+
+    <div class="space-y-4">
+        <div class="border border-border-main rounded-2xl p-6 flex items-center justify-between hover:border-gray-400 transition bg-white">
+            <div class="flex items-center gap-6">
+                <div class="w-12 h-12 rounded-xl bg-accent flex items-center justify-center font-bold text-lg text-dark">
+                    0
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Бесплатно</div>
+                    <h3 class="text-lg font-semibold text-dark">Старт</h3>
+                    <p class="text-gray-400 text-sm mt-0.5">Введение в ментальный фитнес</p>
+                </div>
+            </div>
+            <a href="{% url 'accounts:register' %}"
+                class="border border-border-main px-5 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 text-gray-500 hover:text-dark transition bg-surface-2">
+                Получить бесплатно
+            </a>
+        </div>
+
+        {% for i in "1234" %}
+        <div class="border border-border-main rounded-2xl p-6 flex items-center justify-between hover:border-gray-400 transition bg-white">
+            <div class="flex items-center gap-6">
+                <div class="w-12 h-12 rounded-xl bg-surface-3 flex items-center justify-center font-bold text-lg text-dark">
+                    {{ forloop.counter }}
+                </div>
+                <div>
+                    <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Курс {{ forloop.counter }}</div>
+                    <h3 class="text-lg font-semibold text-dark">Скоро</h3>
+                    <p class="text-gray-400 text-sm mt-0.5">Информация появится позже</p>
+                </div>
+            </div>
+            <a href="{% url 'accounts:register' %}"
+                class="bg-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-dark-2 transition">
+                Купить
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
