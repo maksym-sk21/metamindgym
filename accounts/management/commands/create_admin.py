@@ -11,6 +11,7 @@ class Command(BaseCommand):
 
         email = "wery5859@gmail.com"
         password = "metaadminmind3224"
+        username = "admin"
 
         if not email or not password:
             self.stdout.write(self.style.ERROR('No admin credentials provided'))
@@ -22,7 +23,8 @@ class Command(BaseCommand):
 
         User.objects.create_superuser(
             email=email,
-            password=password
+            password=password,
+            username=username
         )
 
         self.stdout.write(self.style.SUCCESS('Superuser created successfully'))
