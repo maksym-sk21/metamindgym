@@ -1,6 +1,7 @@
 import os
 import zipfile
 import shutil
+import threading
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
@@ -75,7 +76,19 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     accessible = list(UserCourse.objects.filter(user=request.user).values_list('course__course_type', flat=True))
-    all_courses = Course.objects.filter(is_active=True)
+    order_map = {
+        'free': 0,
+        'paid_1': 1,
+        'paid_2': 2,
+        'paid_3': 3,
+        'paid_4': 4,
+    }
+
+    all_courses = sorted(
+        Course.objects.filter(is_active=True),
+        key=lambda c: order_map.get(c.course_type, 999)
+    )
+    
     meetings = Meeting.objects.filter(user=request.user).select_related(
         'lesson__course', 'slot'
     ).order_by('-created_at')
@@ -236,8 +249,13 @@ def lesson_create(request, course_id):
         if form.is_valid():
             lesson = form.save(commit=False)
             lesson.course = course
+            lesson.tilda_path = ''
             lesson.save()
-            messages.success(request, 'Урок добавлен')
+            if lesson.zip_file:
+                thread = threading.Thread(target=lesson.extract_zip)
+                thread.daemon = True
+                thread.start()
+            messages.success(request, 'Урок добавлен. Страница Tilda обрабатывается — подождите минуту.')
             return redirect('accounts:admin_panel')
     else:
         form = LessonForm()
@@ -259,8 +277,18 @@ def lesson_edit(request, course_id, lesson_id):
     if request.method == 'POST':
         form = LessonForm(request.POST, request.FILES, instance=lesson)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Урок обновлён')
+            updated_lesson = form.save(commit=False)
+            has_new_zip = 'zip_file' in request.FILES
+            if has_new_zip:
+                updated_lesson.tilda_path = ''
+            updated_lesson.save()
+            if has_new_zip:
+                thread = threading.Thread(target=updated_lesson.extract_zip)
+                thread.daemon = True
+                thread.start()
+                messages.success(request, 'Урок обновлён. Страница Tilda обрабатывается — подождите минуту.')
+            else:
+                messages.success(request, 'Урок обновлён')
             return redirect('accounts:admin_panel')
     else:
         form = LessonForm(instance=lesson)
@@ -308,7 +336,7 @@ def video_add(request, lesson_pk):
 @site_admin_required
 def video_delete(request, pk):
     video = get_object_or_404(LessonVideo, pk=pk)
-    lesson_pk = video.lesson.pk
+    lesson = video.lesson
     if request.method == 'POST':
         video.video_file.delete(save=False)
         video.delete()

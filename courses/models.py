@@ -51,6 +51,36 @@ class Lesson(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
+    def extract_zip(self):
+        import zipfile
+        import io
+        from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+
+        with self.zip_file.open('rb') as f:
+            zip_data = f.read()
+
+        index_path = None
+
+        with zipfile.ZipFile(io.BytesIO(zip_data)) as z:
+            for name in z.namelist():
+                if name.endswith('/'):
+                    continue
+
+                file_data = z.read(name)
+                save_path = f'lessons/{self.id}/{name}'
+
+                if default_storage.exists(save_path):
+                    default_storage.delete(save_path)
+                default_storage.save(save_path, ContentFile(file_data))
+
+                if name.endswith('index.html') and index_path is None:
+                    index_path = save_path
+
+        if index_path:
+            Lesson.objects.filter(pk=self.pk).update(tilda_path=index_path)
+            self.tilda_path = index_path
+
 
 class LessonVideo(models.Model):
     lesson = models.ForeignKey(
