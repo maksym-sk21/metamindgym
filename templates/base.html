@@ -114,4 +114,27 @@
     }
     </script>
 </body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('form').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            const btn = form.querySelector('button[type="submit"]');
+            if (!btn) return;
+            if (btn.dataset.loading) return;
+            btn.dataset.loading = 'true';
+            btn.disabled = true;
+            const original = btn.innerHTML;
+            btn.dataset.original = original;
+            btn.innerHTML = `
+                <span class="inline-flex items-center gap-2">
+                    <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                    Загрузка...
+                </span>`;
+        });
+    });
+});
+</script>
 </html>
