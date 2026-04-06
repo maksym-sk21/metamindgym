@@ -22,6 +22,13 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from courses.stripe_helpers import create_checkout_session
 
+import uuid
+import json
+import boto3
+from botocore.config import Config
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET, require_POST
+
 
 def landing(request):
     if request.user.is_authenticated:
@@ -314,6 +321,71 @@ def lesson_delete(request, course_id, lesson_id):
         'lesson': lesson,
         'course': course
     })
+
+
+def _get_r2_client():
+    """boto3-клиент для Cloudflare R2."""
+    return boto3.client(
+        's3',
+        endpoint_url=settings.CLOUDFLARE_R2_ENDPOINT_URL,
+        aws_access_key_id=settings.CLOUDFLARE_R2_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+        config=Config(signature_version='s3v4'),
+        region_name='auto',
+    )
+
+
+@login_required
+@site_admin_required
+@require_GET
+def video_presign(request, lesson_pk):
+    lesson = get_object_or_404(Lesson, pk=lesson_pk)
+    filename = request.GET.get('filename', 'video.mp4')
+    content_type = request.GET.get('content_type', 'video/mp4')
+
+    ext = filename.rsplit('.', 1)[-1] if '.' in filename else 'mp4'
+    key = f'lesson_videos/{lesson.pk}/{uuid.uuid4().hex}.{ext}'
+
+    client = _get_r2_client()
+    presigned_url = client.generate_presigned_url(
+        'put_object',
+        Params={
+            'Bucket': settings.CLOUDFLARE_R2_BUCKET_NAME,
+            'Key': key,
+            'ContentType': content_type,
+        },
+        ExpiresIn=3600,
+    )
+
+    return JsonResponse({'url': presigned_url, 'key': key})
+
+
+@login_required
+@site_admin_required
+@require_POST
+def video_confirm(request, lesson_pk):
+    lesson = get_object_or_404(Lesson, pk=lesson_pk)
+
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'invalid json'}, status=400)
+
+    title = data.get('title', '').strip()
+    key = data.get('key', '').strip()
+    order = int(data.get('order', lesson.videos.count()))
+    description = data.get('description', '').strip()
+
+    if not title or not key:
+        return JsonResponse({'error': 'title and key required'}, status=400)
+
+    video = LessonVideo(lesson=lesson, title=title, order=order)
+    if description:
+        video.description = description
+    video.video_file.name = key
+    video.save()
+
+    return JsonResponse({'ok': True, 'id': video.pk, 'title': video.title})
 
 
 @login_required

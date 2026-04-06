@@ -9,6 +9,7 @@
         <p class="text-gray-400 text-sm mt-1">Курс: {{ course.title }}</p>
     </div>
 
+    <!-- Форма урока — БЕЗ ИЗМЕНЕНИЙ -->
     <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-8">
         <form method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
@@ -55,8 +56,9 @@
     <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-8 mt-4 sm:mt-6">
         <h2 class="text-base font-semibold text-dark mb-5">Видео урока</h2>
 
+        <!-- Список загруженных видео — БЕЗ ИЗМЕНЕНИЙ -->
         {% if videos %}
-        <div class="space-y-3 mb-6">
+        <div class="space-y-3 mb-6" id="video-list">
             {% for video in videos %}
             <div class="flex items-center justify-between bg-surface-2 border border-border-main rounded-xl px-3 sm:px-4 py-3 gap-3">
                 <div class="flex items-center gap-3 min-w-0">
@@ -80,43 +82,174 @@
             {% endfor %}
         </div>
         {% else %}
-        <p class="text-gray-400 text-sm mb-6">Видео ещё не добавлены.</p>
+        <p class="text-gray-400 text-sm mb-6" id="no-videos-msg">Видео ещё не добавлены.</p>
         {% endif %}
 
+        <!-- Форма загрузки — ЗАМЕНЕНА на JS/presigned -->
         <div class="border-t border-border-main pt-5">
             <p class="text-sm text-gray-500 mb-4">Добавить видео</p>
-            <form method="POST" action="{% url 'accounts:video_add' lesson.pk %}" enctype="multipart/form-data" class="space-y-3">
-                {% csrf_token %}
+            <div class="space-y-3">
                 <div>
                     <label class="block text-xs text-gray-500 mb-1.5">Название</label>
-                    <input type="text" name="title" placeholder="Например: Введение"
+                    <input type="text" id="video-title" placeholder="Например: Введение"
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1.5">Описание видео <span class="text-gray-300">(необязательно)</span></label>
-                    <textarea name="description" rows="3" placeholder="Что будет разобрано в этом видео..."
+                    <textarea id="video-description" rows="3" placeholder="Что будет разобрано в этом видео..."
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1.5">Видео файл (mp4)</label>
-                    <input type="file" name="video_file" accept="video/*"
+                    <input type="file" id="video-file" accept="video/*"
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 text-gray-400 text-sm focus:outline-none focus:border-gray-400 transition">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 mb-1.5">Порядок</label>
-                    <input type="number" name="order" value="{{ videos|length }}"
+                    <input type="number" id="video-order" value="{{ videos|length }}"
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 </div>
-                <button type="submit"
-                    class="w-full sm:w-auto bg-dark text-white px-5 py-3 rounded-xl font-semibold hover:bg-dark-2 transition text-sm">
+
+                <!-- Прогресс-бар -->
+                <div id="progress-wrap" class="hidden">
+                    <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+                        <span id="progress-label">Загружается…</span>
+                        <span id="progress-pct">0%</span>
+                    </div>
+                    <div class="w-full bg-surface-3 rounded-full h-2">
+                        <div id="progress-bar" class="bg-dark h-2 rounded-full transition-all duration-150" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <button onclick="startUpload()" id="upload-btn"
+                    class="w-full sm:w-auto bg-dark text-white px-5 py-3 rounded-xl font-semibold hover:bg-dark-2 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed">
                     + Загрузить видео
                 </button>
-            </form>
+            </div>
         </div>
     </div>
     {% else %}
     <p class="mt-4 text-gray-400 text-sm px-1">Сначала сохраните урок, чтобы добавить видео.</p>
     {% endif %}
-
 </div>
+
+{% if lesson %}
+<script>
+const PRESIGN_URL = "{% url 'accounts:video_presign' lesson.pk %}";
+const CONFIRM_URL = "{% url 'accounts:video_confirm' lesson.pk %}";
+const CSRF = "{{ csrf_token }}";
+
+async function startUpload() {
+    const title       = document.getElementById('video-title').value.trim();
+    const description = document.getElementById('video-description').value.trim();
+    const file        = document.getElementById('video-file').files[0];
+    const order       = parseInt(document.getElementById('video-order').value) || 0;
+    const btn         = document.getElementById('upload-btn');
+    const wrap        = document.getElementById('progress-wrap');
+    const bar         = document.getElementById('progress-bar');
+    const pct         = document.getElementById('progress-pct');
+    const label       = document.getElementById('progress-label');
+
+    if (!title) { alert('Введите название видео'); return; }
+    if (!file)  { alert('Выберите файл'); return; }
+
+    btn.disabled = true;
+    wrap.classList.remove('hidden');
+    label.textContent = 'Получаем ссылку…';
+
+    try {
+        // 1. Получаем presigned URL
+        const presignResp = await fetch(
+            `${PRESIGN_URL}?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type || 'video/mp4')}`,
+            { headers: { 'X-CSRFToken': CSRF } }
+        );
+        if (!presignResp.ok) throw new Error('Не удалось получить ссылку для загрузки');
+        const { url, key } = await presignResp.json();
+
+        // 2. Загружаем напрямую в R2 с прогрессом
+        label.textContent = 'Загрузка в облако…';
+        await uploadToR2(url, file, (loaded, total) => {
+            const p = Math.round(loaded / total * 100);
+            bar.style.width = p + '%';
+            pct.textContent = p + '%';
+        });
+
+        // 3. Сохраняем запись в БД
+        label.textContent = 'Сохраняем…';
+        const confirmResp = await fetch(CONFIRM_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify({ title, description, key, order }),
+        });
+        if (!confirmResp.ok) throw new Error('Ошибка сохранения в базе данных');
+        const video = await confirmResp.json();
+
+        // 4. Добавляем строку в список без перезагрузки
+        addVideoRow(video.title, description, key, order);
+
+        // Сброс формы
+        document.getElementById('video-title').value = '';
+        document.getElementById('video-description').value = '';
+        document.getElementById('video-file').value = '';
+        document.getElementById('video-order').value = order + 1;
+        bar.style.width = '0%';
+        pct.textContent = '0%';
+        wrap.classList.add('hidden');
+        label.textContent = 'Загружается…';
+
+        // Убираем заглушку "нет видео"
+        const noMsg = document.getElementById('no-videos-msg');
+        if (noMsg) noMsg.remove();
+
+    } catch (err) {
+        alert('Ошибка: ' + err.message);
+        wrap.classList.add('hidden');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function uploadToR2(url, file, onProgress) {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', url);
+        xhr.setRequestHeader('Content-Type', file.type || 'video/mp4');
+        xhr.upload.addEventListener('progress', e => {
+            if (e.lengthComputable) onProgress(e.loaded, e.total);
+        });
+        xhr.addEventListener('load', () => {
+            xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`R2 вернул ${xhr.status}`));
+        });
+        xhr.addEventListener('error', () => reject(new Error('Ошибка сети при загрузке')));
+        xhr.send(file);
+    });
+}
+
+function addVideoRow(title, description, key, order) {
+    let list = document.getElementById('video-list');
+    if (!list) {
+        list = document.createElement('div');
+        list.id = 'video-list';
+        list.className = 'space-y-3 mb-6';
+        // Вставляем перед разделителем
+        const border = document.querySelector('.border-t.border-border-main.pt-5');
+        border.parentNode.insertBefore(list, border);
+    }
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between bg-surface-2 border border-border-main rounded-xl px-3 sm:px-4 py-3 gap-3';
+    row.innerHTML = `
+        <div class="flex items-center gap-3 min-w-0">
+            <span class="text-gray-400 text-xs font-mono w-5 shrink-0">${order}</span>
+            <div class="min-w-0">
+                <p class="text-sm font-medium text-dark truncate">${title}</p>
+                ${description ? `<p class="text-xs text-gray-500 truncate mt-0.5">${description}</p>` : ''}
+                <p class="text-xs text-gray-400 truncate">${key}</p>
+            </div>
+        </div>
+        <span class="text-green-500 text-xs shrink-0 font-medium">✓ загружено</span>
+    `;
+    list.appendChild(row);
+}
+</script>
+{% endif %}
 {% endblock %}
