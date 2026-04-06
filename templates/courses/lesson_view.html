@@ -14,7 +14,7 @@
             <span class="text-sm font-medium text-dark truncate">{{ lesson.title }}</span>
             <button onclick="toggleSidebar()" id="sidebar-toggle"
                 class="hidden sm:block text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition shrink-0">
-                ☰ Уроки
+                ☰ Lecciones
             </button>
         </div>
 
@@ -24,19 +24,19 @@
                 <button id="tab-video" onclick="showVideo()"
                     class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition bg-white text-dark shadow-sm border border-border-main">
                     <span>▶</span>
-                    <span class="hidden sm:inline">Видео</span>
+                    <span class="hidden sm:inline">Video</span>
                 </button>
                 <button id="tab-theory" onclick="showTheory()"
                     class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition text-gray-500 hover:text-dark">
                     <span>📖</span>
-                    <span class="hidden sm:inline">Теория</span>
+                    <span class="hidden sm:inline">Teoría</span>
                 </button>
             </div>
             {% endif %}
 
             <a href="{% url 'courses:book_meeting' course.id lesson.id %}"
                 class="text-xs border border-border-main px-2.5 sm:px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition whitespace-nowrap">
-                <span class="hidden sm:inline">Запланировать встречу</span>
+                <span class="hidden sm:inline">Reservar reunión</span>
                 <span class="sm:hidden">📅</span>
             </a>
         </div>
@@ -51,7 +51,7 @@
             class="hidden sm:block border-r border-border-main shrink-0 bg-white sticky top-[105px] self-start h-[calc(100vh-105px)] overflow-y-auto"
             style="width: 256px; transition: width 0.3s ease, overflow 0.3s ease;">
             <div class="px-4 py-3 text-xs text-gray-400 uppercase tracking-wider border-b border-border-main font-medium whitespace-nowrap">
-                Уроки курса
+                Lecciones del curso
             </div>
             {% for l in lessons %}
             <a href="{% url 'courses:lesson_view' course.id l.id %}"
@@ -85,13 +85,13 @@
                                 class="w-full h-full object-contain"
                                 controls preload="metadata"
                                 src="{{ videos.0.video_file.url }}">
-                                Ваш браузер не поддерживает видео.
+                                Tu navegador no soporta video.
                             </video>
                         </div>
                         <div class="w-72 shrink-0 flex flex-col border-l border-gray-800 overflow-y-auto" style="background:#111111;">
                             <div class="px-4 py-3 border-b border-gray-800 shrink-0">
                                 <p class="text-white text-sm font-semibold">{{ lesson.title }}</p>
-                                <p class="text-gray-500 text-xs mt-0.5">{{ videos|length }} видео</p>
+                                <p class="text-gray-500 text-xs mt-0.5">{{ videos|length }} videos</p>
                             </div>
                             {% for video in videos %}
                             <button onclick="switchVideo('{{ video.video_file.url }}', '{{ video.title|escapejs }}', '{{ video.description|escapejs }}', this)"
@@ -116,7 +116,7 @@
                             style="max-height: 56vw; min-height: 200px;"
                             controls preload="metadata"
                             src="{{ videos.0.video_file.url }}">
-                            Ваш браузер не поддерживает видео.
+                            Tu navegador no soporta video.
                         </video>
                         <!-- Mobile: горизонтальные табы -->
                         <div class="flex gap-2 overflow-x-auto px-3 py-2.5 border-t border-gray-800" style="background:#111111;">
@@ -142,7 +142,7 @@
                             style="max-height: 65vh;"
                             controls preload="metadata"
                             src="{{ videos.0.video_file.url }}">
-                            Ваш браузер не поддерживает видео.
+                            Tu navegador no soporta video.
                         </video>
                     </div>
                     <!-- Mobile -->
@@ -152,7 +152,7 @@
                             style="max-height: 56vw; min-height: 200px;"
                             controls preload="metadata"
                             src="{{ videos.0.video_file.url }}">
-                            Ваш браузер не поддерживает видео.
+                            Tu navegador no soporta video.
                         </video>
                     </div>
                 </div>
@@ -197,8 +197,8 @@
             <div class="flex items-center justify-center text-center bg-surface-2 p-8" style="min-height: 60vh;">
                 <div>
                     <div class="text-4xl sm:text-5xl mb-4">🚧</div>
-                    <h2 class="text-lg sm:text-xl font-semibold text-dark mb-2">Контент скоро будет</h2>
-                    <p class="text-gray-400 text-sm">Материалы урока ещё не загружены.</p>
+                    <h2 class="text-lg sm:text-xl font-semibold text-dark mb-2">El contenido estará disponible pronto</h2>
+                    <p class="text-gray-400 text-sm">Los materiales de la lección aún no han sido cargados.</p>
                 </div>
             </div>
             {% endif %}
@@ -219,12 +219,12 @@ function toggleSidebar() {
         sidebar.style.width = '0px';
         sidebar.style.overflow = 'hidden';
         sidebar.dataset.open = 'false';
-        btn.textContent = '☰ Показать уроки';
+        btn.textContent = '☰ Mostrar lecciones';
     } else {
         sidebar.style.width = '256px';
         sidebar.style.overflow = 'auto';
         sidebar.dataset.open = 'true';
-        btn.textContent = '☰ Скрыть уроки';
+        btn.textContent = '☰ Ocultar lecciones';
     }
 }
 

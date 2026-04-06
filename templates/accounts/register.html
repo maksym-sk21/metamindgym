@@ -1,49 +1,49 @@
 {% extends 'base.html' %}
-{% block title %}Регистрация — MetaMindGym{% endblock %}
+{% block title %}Registro — MetaMindGym{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto px-6 py-24">
     <div class="bg-white border border-border-main rounded-2xl p-8">
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-dark">Создать аккаунт</h1>
-            <p class="text-gray-400 mt-1 text-sm">Первый курс — бесплатно</p>
+            <h1 class="text-2xl font-bold text-dark">Crear cuenta</h1>
+            <p class="text-gray-400 mt-1 text-sm">El primer curso es gratis</p>
         </div>
         <form method="POST" class="space-y-4">
             {% csrf_token %}
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Email</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Correo electrónico</label>
                 <input type="email" name="email" value="{{ form.email.value|default:'' }}"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"
                     placeholder="you@example.com">
                 {% if form.email.errors %}<p class="text-red-500 text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Имя пользователя</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Nombre de usuario</label>
                 <input type="text" name="username" value="{{ form.username.value|default:'' }}"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"
                     placeholder="username">
                 {% if form.username.errors %}<p class="text-red-500 text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Пароль</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Contraseña</label>
                 <input type="password" name="password1"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 {% if form.password1.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Повторите пароль</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Repite la contraseña</label>
                 <input type="password" name="password2"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 {% if form.password2.errors %}<p class="text-red-500 text-xs mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
             </div>
             <button type="submit"
                 class="w-full bg-dark text-white py-3 rounded-xl font-bold hover:bg-dark-2 transition mt-2 text-sm">
-                Зарегистрироваться
+                Registrarse
             </button>
         </form>
         <p class="text-center text-gray-400 text-sm mt-6">
-            Уже есть аккаунт?
-            <a href="{% url 'accounts:login' %}" class="text-dark font-medium hover:underline">Войти</a>
+            ¿Ya tienes una cuenta?
+            <a href="{% url 'accounts:login' %}" class="text-dark font-medium hover:underline">Iniciar sesión</a>
         </p>
     </div>
 </div>

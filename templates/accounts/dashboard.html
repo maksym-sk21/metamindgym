@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Мои курсы — MetaMindGym{% endblock %}
+{% block title %}Mis cursos — MetaMindGym{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto px-6 py-4">
@@ -7,7 +7,7 @@
     <div class="space-y-4">
         {% if meetings %}
         <div class="mt-12">
-            <h2 class="text-lg font-semibold text-dark mb-4">Запланированные встречи</h2>
+            <h2 class="text-lg font-semibold text-dark mb-4">Reuniones programadas</h2>
             <div class="space-y-3">
                 {% for meeting in meetings %}
                 <div class="bg-white border rounded-2xl px-6 py-4 flex items-center justify-between
@@ -26,7 +26,7 @@
                         </div>
                         <div>
                             <div class="font-medium text-dark text-sm">{{ meeting.lesson.course.title }} — {{ meeting.lesson.title }}</div>
-                            <div class="text-gray-400 text-xs mt-0.5">{{ meeting.slot.date }} в {{ meeting.slot.time }}</div>
+                            <div class="text-gray-400 text-xs mt-0.5">{{ meeting.slot.date }} a las {{ meeting.slot.time }}</div>
                         </div>
                     </div>
 
@@ -40,10 +40,10 @@
                         {% if meeting.status == 'confirmed' and meeting.meet_link %}
                             <a href="{{ meeting.meet_link }}" target="_blank"
                                 class="bg-dark text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-dark-2 transition">
-                                Войти в встречу →
+                                Unirse a la reunión →
                             </a>
                         {% elif meeting.status == 'confirmed' %}
-                            <span class="text-xs text-gray-400">Ссылка скоро появится</span>
+                            <span class="text-xs text-gray-400">El enlace aparecerá pronto</span>
                         {% endif %}
                     </div>
 
@@ -53,8 +53,8 @@
         </div>
         {% endif %}
     <div class="mb-10">
-        <h1 class="text-3xl font-bold text-dark">Мои курсы</h1>
-        <p class="text-gray-400 mt-1 text-sm">Привет, {{ user.username }}</p>
+        <h1 class="text-3xl font-bold text-dark">Mis cursos</h1>
+        <p class="text-gray-400 mt-1 text-sm">Hola, {{ user.username }}</p>
     </div>
 
         {% for course in all_courses %}
@@ -74,9 +74,9 @@
                 </div>
                 <div>
                     {% if course.course_type == 'free' %}
-                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Бесплатно</div>
+                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Gratis</div>
                     {% else %}
-                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Курс</div>
+                        <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Curso</div>
                     {% endif %}
                     <h3 class="font-semibold text-lg text-dark">{{ course.title }}</h3>
                     <p class="text-gray-400 text-sm mt-0.5">{{ course.description|truncatechars:80 }}</p>
@@ -87,12 +87,12 @@
                 {% if course.course_type in accessible %}
                     <a href="{% url 'courses:course_detail' course.id %}"
                         class="bg-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-dark-2 transition">
-                        Открыть
+                        Abrir
                     </a>
                 {% else %}
                     <a href="{% url 'accounts:checkout' course.id %}"
                         class="border border-border-main px-5 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:border-gray-400 hover:text-dark transition">
-                        Купить — €{{ course.price }}
+                        Comprar — €{{ course.price }}
                     </a>
                 {% endif %}
             </div>

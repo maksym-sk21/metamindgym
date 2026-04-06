@@ -5,7 +5,7 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
     <div class="mb-6 sm:mb-8">
-        <a href="{% url 'accounts:dashboard' %}" class="text-gray-400 hover:text-dark transition text-sm">← Мои курсы</a>
+        <a href="{% url 'accounts:dashboard' %}" class="text-gray-400 hover:text-dark transition text-sm">← Mis cursos</a>
     </div>
 
     <div class="mb-7 sm:mb-10">
@@ -29,11 +29,11 @@
                     <div class="flex gap-2 mt-3 sm:hidden">
                         <a href="{% url 'courses:lesson_view' course.id lesson.id %}"
                             class="flex-1 text-center text-xs bg-dark text-white px-3 py-2 rounded-lg hover:bg-dark-2 transition font-medium">
-                            Открыть урок
+                            Abrir lección
                         </a>
                         <a href="{% url 'courses:book_meeting' course.id lesson.id %}"
                             class="flex-1 text-center text-xs border border-border-main px-3 py-2 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
-                            Встреча
+                            Reunión
                         </a>
                     </div>
                 </div>
@@ -41,11 +41,11 @@
                 <div class="hidden sm:flex gap-3 shrink-0 ml-4">
                     <a href="{% url 'courses:lesson_view' course.id lesson.id %}"
                         class="text-sm bg-dark text-white px-4 py-2 rounded-lg hover:bg-dark-2 transition font-medium">
-                        Открыть урок
+                        Abrir lección
                     </a>
                     <a href="{% url 'courses:book_meeting' course.id lesson.id %}"
                         class="text-sm border border-border-main px-4 py-2 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
-                        Запланировать встречу
+                        Programar reunión
                     </a>
                 </div>
             </div>
@@ -53,7 +53,7 @@
         {% empty %}
         <div class="text-center py-12 sm:py-16 bg-white border border-border-main rounded-2xl">
             <div class="text-4xl mb-4">🚧</div>
-            <p class="text-gray-400">Уроки ещё не добавлены</p>
+            <p class="text-gray-400">Las lecciones aún no han sido añadidas</p>
         </div>
         {% endfor %}
     </div>

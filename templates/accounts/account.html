@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Аккаунт — MetaMindGym{% endblock %}
+{% block title %}Cuenta — MetaMindGym{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto px-6 py-16">
@@ -19,40 +19,40 @@
     </div>
 
     <div class="bg-white border border-border-main rounded-2xl p-8 mb-6">
-        <h2 class="text-base font-semibold text-dark mb-6">Личные данные</h2>
+        <h2 class="text-base font-semibold text-dark mb-6">Datos personales</h2>
         <form method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm text-gray-500 mb-1.5">Имя</label>
+                    <label class="block text-sm text-gray-500 mb-1.5">Nombre</label>
                     <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}"
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 </div>
                 <div>
-                    <label class="block text-sm text-gray-500 mb-1.5">Фамилия</label>
+                    <label class="block text-sm text-gray-500 mb-1.5">Apellido</label>
                     <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}"
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
                 </div>
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Имя пользователя</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Nombre de usuario</label>
                 <input type="text" name="username" value="{{ form.username.value|default:'' }}"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Телефон</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Teléfono</label>
                 <input type="text" name="phone" value="{{ form.phone.value|default:'' }}"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"
                     placeholder="+380...">
             </div>
             <div>
-                <label class="block text-sm text-gray-500 mb-1.5">Фото профиля</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Foto de perfil</label>
                 <input type="file" name="avatar" accept="image/*"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 text-gray-400 text-sm focus:outline-none focus:border-gray-400 transition">
             </div>
             <button type="submit"
                 class="bg-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-dark-2 transition text-sm">
-                Сохранить изменения
+                Guardar cambios
             </button>
         </form>
     </div>
@@ -60,11 +60,11 @@
     <div class="space-y-3">
         <a href="{% url 'accounts:change_password' %}"
             class="block w-full text-center border border-border-main px-6 py-3 rounded-xl text-sm hover:border-gray-400 text-gray-500 hover:text-dark transition bg-white">
-            Изменить пароль
+            Cambiar contraseña
         </a>
         <a href="{% url 'accounts:delete_account' %}"
             class="block w-full text-center border border-red-200 text-red-500 px-6 py-3 rounded-xl text-sm hover:border-red-400 transition bg-white">
-            Удалить аккаунт
+            Eliminar cuenta
         </a>
     </div>
 </div>

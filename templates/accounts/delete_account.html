@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Удалить аккаунт — MetaMindGym{% endblock %}
+{% block title %}Eliminar cuenta — MetaMindGym{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto px-6 py-24">
@@ -7,17 +7,17 @@
         <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-6 text-2xl">
             ⚠️
         </div>
-        <h1 class="text-2xl font-bold text-dark mb-3">Удалить аккаунт?</h1>
-        <p class="text-gray-400 text-sm mb-8">Это действие необратимо. Все твои данные и доступы к курсам будут удалены навсегда.</p>
+        <h1 class="text-2xl font-bold text-dark mb-3">¿Eliminar cuenta?</h1>
+        <p class="text-gray-400 text-sm mb-8">Esta acción es irreversible. Todos tus datos y accesos a los cursos serán eliminados para siempre.</p>
         <form method="POST" class="space-y-3">
             {% csrf_token %}
             <button type="submit"
                 class="w-full bg-red-500 text-white py-3 rounded-xl font-bold hover:bg-red-600 transition text-sm">
-                Да, удалить аккаунт
+                Sí, eliminar cuenta
             </button>
         </form>
         <a href="{% url 'accounts:account' %}" class="block text-gray-400 hover:text-dark mt-4 text-sm transition">
-            Отмена
+            Cancelar
         </a>
     </div>
 </div>
