@@ -19,7 +19,7 @@ def course_detail(request, course_id):
     accessible = get_user_accessible_courses(request.user)
 
     if course.id not in accessible:
-        messages.error(request, 'У тебя нет доступа к этому курсу')
+        messages.error(request, 'No tienes acceso a este curso')
         return redirect('accounts:dashboard')
 
     lessons = course.lessons.filter(is_active=True)
@@ -36,7 +36,7 @@ def lesson_view(request, course_id, lesson_id):
     accessible = get_user_accessible_courses(request.user)
 
     if course.id not in accessible:
-        messages.error(request, 'У тебя нет доступа к этому курсу')
+        messages.error(request, 'No tienes acceso a este curso')
         return redirect('accounts:dashboard')
 
     lessons = course.lessons.filter(is_active=True)
@@ -54,7 +54,7 @@ def book_meeting(request, course_id, lesson_id):
     accessible = get_user_accessible_courses(request.user)
 
     if course.id not in accessible:
-        messages.error(request, 'У тебя нет доступа к этому курсу')
+        messages.error(request, 'No tienes acceso a este curso')
         return redirect('accounts:dashboard')
 
     if request.method == 'POST':
@@ -63,7 +63,7 @@ def book_meeting(request, course_id, lesson_id):
         slot = get_object_or_404(AvailableSlot, id=slot_id, is_booked=False)
 
         if Meeting.objects.filter(user=request.user, lesson=lesson).exists():
-            messages.error(request, 'Ты уже записан на встречу по этому уроку')
+            messages.error(request, 'Ya tienes una reunión reservada para esta lección')
             return redirect('courses:course_detail', course_id=course.id)
 
         meeting = Meeting.objects.create(
@@ -78,7 +78,7 @@ def book_meeting(request, course_id, lesson_id):
         admin_url = request.build_absolute_uri('/admin-panel/meetings/')
         notify_new_meeting(meeting, admin_url)
 
-        messages.success(request, f'Встреча запланирована на {slot.date} в {slot.time}')
+        messages.success(request, f'Reunión reservada para el {slot.date} a las {slot.time}')
         return redirect('courses:course_detail', course_id=course.id)
 
     slots = AvailableSlot.objects.filter(is_booked=False).order_by('date', 'time')

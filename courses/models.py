@@ -4,11 +4,11 @@ from django.conf import settings
 
 class Course(models.Model):
     COURSE_TYPE_CHOICES = [
-        ('free', 'Бесплатный'),
-        ('paid_1', 'Курс 1'),
-        ('paid_2', 'Курс 2'),
-        ('paid_3', 'Курс 3'),
-        ('paid_4', 'Курс 4'),
+        ('free', 'Gratis'),
+        ('paid_1', 'Curso 1'),
+        ('paid_2', 'Curso 2'),
+        ('paid_3', 'Curso 3'),
+        ('paid_4', 'Curso 4'),
     ]
 
     title = models.CharField(max_length=200, verbose_name='Название')
@@ -140,14 +140,14 @@ class AvailableSlot(models.Model):
         unique_together = ('date', 'time')
 
     def __str__(self):
-        return f'{self.date} {self.time} — {"занято" if self.is_booked else "свободно"}'
+        return f'{self.date} {self.time} — {"ocupado" if self.is_booked else "disponible"}'
 
 
 class Meeting(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Ожидает подтверждения'),
-        ('confirmed', 'Подтверждена'),
-        ('cancelled', 'Отменена'),
+        ('pending', 'Pendiente'),
+        ('confirmed', 'Confirmada'),
+        ('cancelled', 'Cancelada'),
     ]
 
     user = models.ForeignKey(

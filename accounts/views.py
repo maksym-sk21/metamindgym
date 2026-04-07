@@ -49,7 +49,7 @@ def register_view(request):
             except Course.DoesNotExist:
                 pass
             login(request, user)
-            messages.success(request, 'Добро пожаловать! Бесплатный курс уже доступен.')
+            messages.success(request, '¡Bienvenido! El curso gratuito ya está disponible.')
             return redirect('accounts:dashboard')
     else:
         form = RegisterForm()
@@ -69,7 +69,7 @@ def login_view(request):
                 login(request, user)
                 return redirect('accounts:dashboard')
             else:
-                messages.error(request, 'Неверный email или пароль')
+                messages.error(request, 'Correo electrónico o contraseña incorrectos')
     else:
         form = LoginForm()
     return render(request, 'accounts/login.html', {'form': form})
@@ -112,7 +112,7 @@ def account_view(request):
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Профиль обновлён')
+            messages.success(request, 'Perfil actualizado')
             return redirect('accounts:account')
     else:
         form = ProfileForm(instance=request.user)
@@ -126,7 +126,7 @@ def change_password_view(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
-            messages.success(request, 'Пароль успешно изменён')
+            messages.success(request, 'Contraseña actualizada correctamente')
             return redirect('accounts:account')
     else:
         form = CustomPasswordChangeForm(request.user)
@@ -139,7 +139,7 @@ def delete_account_view(request):
         user = request.user
         logout(request)
         user.delete()
-        messages.success(request, 'Аккаунт удалён')
+        messages.success(request, 'Cuenta eliminada')
         return redirect('accounts:landing')
     return render(request, 'accounts/delete_account.html')
 
@@ -496,7 +496,7 @@ def checkout(request, course_id):
     course = get_object_or_404(Course, id=course_id, is_active=True)
 
     if UserCourse.objects.filter(user=request.user, course=course).exists():
-        messages.info(request, 'У тебя уже есть доступ к этому курсу')
+        messages.info(request, 'Ya tienes acceso a este curso')
         return redirect('accounts:dashboard')
 
     success_url = request.build_absolute_uri('/checkout/success/?session_id={CHECKOUT_SESSION_ID}')
@@ -508,13 +508,13 @@ def checkout(request, course_id):
 
 @login_required
 def checkout_success(request):
-    messages.success(request, 'Оплата прошла успешно! Курс уже доступен в кабинете.')
+    messages.success(request, '¡Pago realizado con éxito! El curso ya está disponible en tu cuenta.')
     return redirect('accounts:dashboard')
 
 
 @login_required
 def checkout_cancel(request):
-    messages.error(request, 'Оплата отменена.')
+    messages.error(request, 'Pago cancelado.')
     return redirect('accounts:dashboard')
 
 
