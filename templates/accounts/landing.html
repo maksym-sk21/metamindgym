@@ -3,69 +3,594 @@
 
 {% block content %}
 
-<section class="max-w-6xl mx-auto px-6 py-28 text-center">
-    <div class="inline-block bg-accent text-dark text-xs font-semibold px-4 py-1.5 rounded-full mb-8 tracking-wider uppercase">
-        Mental Fitness Platform
-    </div>
-    <h1 class="text-6xl font-bold mb-6 leading-tight tracking-tight text-dark">
-        Прокачай свой разум
-    </h1>
-    <p class="text-xl text-gray-500 mb-10 max-w-xl mx-auto leading-relaxed">
-        Курсы по развитию мышления, продуктивности и mental fitness. Первый курс — бесплатно.
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .lp { background: #fff; color: #1a1a1a; overflow-x: hidden; }
+
+  /* HERO */
+  .hero {
+    padding: 96px 24px 80px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: #F0DD49;
+    color: #1a1a1a;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    max-width: 720px;
+    margin: 0 auto 24px;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: #666;
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .btn-secondary {
+    background: #fff;
+    color: #555;
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  /* STATS */
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f5f5f5;
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    flex: 1;
+    min-width: 140px;
+    padding: 28px 24px;
+    text-align: center;
+    border-right: 1px solid #e0e0e0;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    display: block;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+  }
+
+  /* ELEMENTS */
+  .section {
+    padding: 80px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 12px;
+    line-height: 1.15;
+  }
+  .section-sub {
+    font-size: 16px;
+    color: #666;
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+
+  .elements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .el-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 28px 20px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .el-card:hover { border-color: #aaa; transform: translateY(-2px); }
+  .el-card.active { border-width: 2px; }
+
+  .el-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 22px;
+  }
+  .el-name {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .el-tagline {
+    font-size: 12px;
+    color: #888;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 10px;
+  }
+  .el-desc {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.55;
+  }
+
+  .fire .el-icon   { background: #FFF0E0; }
+  .tree .el-icon   { background: #EAF5E0; }
+  .water .el-icon  { background: #E0F0FF; }
+  .metal .el-icon  { background: #F0F0F0; }
+  .earth .el-icon  { background: #F5EDE0; }
+
+  .fire.active  { border-color: #E8703A; }
+  .tree.active  { border-color: #4CAF50; }
+  .water.active { border-color: #2196F3; }
+  .metal.active { border-color: #9E9E9E; }
+  .earth.active { border-color: #A0784A; }
+
+  /* HOW IT WORKS */
+  .how-wrap {
+    border-top: 1px solid #e0e0e0;
+    background: #f5f5f5;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2px;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .step {
+    background: #fff;
+    padding: 32px 24px;
+  }
+  .step-num {
+    width: 32px;
+    height: 32px;
+    background: #F0DD49;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+  }
+  .step h4 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .step p  { font-size: 13px; color: #777; line-height: 1.55; }
+
+  /* COURSES */
+  .courses-list { display: flex; flex-direction: column; gap: 12px; }
+  .course-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 20px 24px;
+    background: #fff;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .course-left { display: flex; align-items: center; gap: 20px; }
+  .course-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .course-info {}
+  .course-tag {
+    font-size: 11px;
+    font-weight: 600;
+    color: #aaa;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-bottom: 3px;
+  }
+  .course-title { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+  .course-desc  { font-size: 13px; color: #888; margin-top: 2px; }
+  .course-btn-free {
+    padding: 10px 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    background: #f5f5f5;
+    cursor: pointer;
+    flex-shrink: 0;
+    text-decoration: none;
+  }
+  .course-btn-paid {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: #1a1a1a;
+    cursor: pointer;
+    flex-shrink: 0;
+    text-decoration: none;
+    border: none;
+  }
+
+  /* QUIZ */
+  .quiz-wrap {
+    border-top: 1px solid #e0e0e0;
+    background: #1a1a1a;
+    color: #fff;
+  }
+  .quiz-inner {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .quiz-inner .section-label { color: #888; }
+  .quiz-inner .section-title { color: #fff; margin-bottom: 16px; }
+  .quiz-inner .section-sub   { color: #aaa; margin: 0 auto 40px; }
+  .quiz-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .quiz-opt {
+    padding: 10px 20px;
+    border: 1px solid #333;
+    border-radius: 100px;
+    font-size: 14px;
+    color: #ccc;
+    cursor: pointer;
+    background: transparent;
+    transition: all .2s;
+  }
+  .quiz-opt:hover, .quiz-opt.selected {
+    border-color: #F0DD49;
+    color: #F0DD49;
+    background: rgba(240,221,73,.07);
+  }
+  .quiz-result {
+    background: rgba(255,255,255,.05);
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 24px;
+    font-size: 15px;
+    color: #ddd;
+    line-height: 1.6;
+    display: none;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .quiz-result.show { display: block; }
+  .quiz-result strong { color: #F0DD49; }
+
+  /* CTA */
+  .cta-wrap {
+    border-top: 1px solid #e0e0e0;
+    background: #F0DD49;
+    padding: 80px 24px;
+    text-align: center;
+  }
+  .cta-wrap h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 700; letter-spacing: -.02em; margin-bottom: 12px; color: #1a1a1a; }
+  .cta-wrap p  { font-size: 16px; color: #555; margin-bottom: 32px; }
+  .btn-dark { background: #1a1a1a; color: #fff; padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 600; text-decoration: none; border: none; cursor: pointer; display: inline-block; }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid #e0e0e0;
+    padding: 28px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: #aaa;
+    background: #fff;
+  }
+</style>
+
+<div class="lp">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">Mental Fitness Platform</div>
+    <h1>Узнай свою природу.<br>Прокачай свой разум.</h1>
+    <p class="hero-sub">
+      Пять стихий — пять психотипов. Узнай, кто ты: Огонь, Дерево, Вода, Металл или Земля. Пойми себя и тех, кто рядом.
     </p>
-    <div class="flex gap-4 justify-center">
-        <a href="{% url 'accounts:register' %}"
-            class="bg-dark text-white px-8 py-3.5 rounded-lg font-bold text-base hover:bg-dark-2 transition">
-            Начать бесплатно
-        </a>
-        <a href="#courses"
-            class="border border-border-main px-8 py-3.5 rounded-lg font-medium text-base text-gray-500 hover:text-dark hover:border-gray-400 transition bg-white">
-            Узнать больше
-        </a>
+    <div class="hero-cta">
+      <a class="btn-primary" href="{% url 'accounts:register' %}">Начать бесплатно</a>
     </div>
-</section>
+  </div>
 
-<section id="courses" class="max-w-6xl mx-auto px-6 py-16 border-t border-border-main">
-    <h2 class="text-3xl font-bold mb-3 text-dark">Курсы</h2>
-    <p class="text-gray-400 mb-12">Выбери свой путь развития</p>
-
-    <div class="space-y-4">
-        <div class="border border-border-main rounded-2xl p-6 flex items-center justify-between hover:border-gray-400 transition bg-white">
-            <div class="flex items-center gap-6">
-                <div class="w-12 h-12 rounded-xl bg-accent flex items-center justify-center font-bold text-lg text-dark">
-                    0
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Бесплатно</div>
-                    <h3 class="text-lg font-semibold text-dark">Старт</h3>
-                    <p class="text-gray-400 text-sm mt-0.5">Введение в ментальный фитнес</p>
-                </div>
-            </div>
-            <a href="{% url 'accounts:register' %}"
-                class="border border-border-main px-5 py-2.5 rounded-lg text-sm font-medium hover:border-gray-400 text-gray-500 hover:text-dark transition bg-surface-2">
-                Получить бесплатно
-            </a>
-        </div>
-
-        {% for i in "1234" %}
-        <div class="border border-border-main rounded-2xl p-6 flex items-center justify-between hover:border-gray-400 transition bg-white">
-            <div class="flex items-center gap-6">
-                <div class="w-12 h-12 rounded-xl bg-surface-3 flex items-center justify-center font-bold text-lg text-dark">
-                    {{ forloop.counter }}
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Курс {{ forloop.counter }}</div>
-                    <h3 class="text-lg font-semibold text-dark">Скоро</h3>
-                    <p class="text-gray-400 text-sm mt-0.5">Информация появится позже</p>
-                </div>
-            </div>
-            <a href="{% url 'accounts:register' %}"
-                class="bg-dark text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-dark-2 transition">
-                Купить
-            </a>
-        </div>
-        {% endfor %}
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-num">5</span>
+      <span class="stat-label">Психотипов</span>
     </div>
-</section>
+    <div class="stat-item">
+      <span class="stat-num">4</span>
+      <span class="stat-label">Курса</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">1</span>
+      <span class="stat-label">Бесплатный старт</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">∞</span>
+      <span class="stat-label">Возможностей</span>
+    </div>
+  </div>
+
+  <!-- ELEMENTS -->
+  <div class="section">
+    <div class="section-label">Пять стихий</div>
+    <div class="section-title">Какой ты психотип?</div>
+    <div class="section-sub">
+      Нажми на стихию, чтобы узнать её характер, сильные стороны и как она взаимодействует с другими.
+    </div>
+    <div class="elements-grid">
+      <div class="el-card fire" onclick="selectEl(this)">
+        <div class="el-icon">🔥</div>
+        <div class="el-tagline">Огонь</div>
+        <div class="el-name">Лидер</div>
+        <div class="el-desc">Энергичный, харизматичный, вдохновляющий. Горит идеями и ведёт других за собой.</div>
+      </div>
+      <div class="el-card tree" onclick="selectEl(this)">
+        <div class="el-icon">🌿</div>
+        <div class="el-tagline">Дерево</div>
+        <div class="el-name">Созидатель</div>
+        <div class="el-desc">Стратег с долгим взглядом. Терпелив, гибок, умеет расти через любые препятствия.</div>
+      </div>
+      <div class="el-card water" onclick="selectEl(this)">
+        <div class="el-icon">💧</div>
+        <div class="el-tagline">Вода</div>
+        <div class="el-name">Мыслитель</div>
+        <div class="el-desc">Глубокий, интуитивный, адаптивный. Находит путь там, где другие видят стену.</div>
+      </div>
+      <div class="el-card metal" onclick="selectEl(this)">
+        <div class="el-icon">⚙️</div>
+        <div class="el-tagline">Металл</div>
+        <div class="el-name">Перфекционист</div>
+        <div class="el-desc">Чёткий, принципиальный, системный. Создаёт структуру и держит стандарты.</div>
+      </div>
+      <div class="el-card earth" onclick="selectEl(this)">
+        <div class="el-icon">🪨</div>
+        <div class="el-tagline">Земля</div>
+        <div class="el-name">Опора</div>
+        <div class="el-desc">Надёжный, заботливый, стабильный. Центр, вокруг которого держится команда.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-wrap">
+    <div class="section">
+      <div class="section-label">Как это работает</div>
+      <div class="section-title">Три шага к себе</div>
+      <div class="section-sub">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Пройди тест</h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>Узнай свой психотип</h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>Выбери курс</h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h4>Применяй знания</h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURSES -->
+  <div class="section">
+    <div class="section-label">Программа</div>
+    <div class="section-title">Курсы</div>
+    <div class="section-sub">
+      Первый курс доступен сразу после регистрации — бесплатно. Остальные открываются по мере твоего роста.
+    </div>
+    <div class="courses-list">
+      <div class="course-row">
+        <div class="course-left">
+          <div class="course-num" style="background:#F0DD49;color:#1a1a1a;">0</div>
+          <div class="course-info">
+            <div class="course-tag">Бесплатно</div>
+            <div class="course-title">Старт — Введение в пять стихий</div>
+            <div class="course-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+          </div>
+        </div>
+        <a class="course-btn-free" href="{% url 'accounts:register' %}">Получить бесплатно</a>
+      </div>
+      <div class="course-row">
+        <div class="course-left">
+          <div class="course-num" style="background:#f5f5f5;color:#1a1a1a;">1</div>
+          <div class="course-info">
+            <div class="course-tag">Курс 1</div>
+            <div class="course-title">Огонь и Дерево — Энергия и рост</div>
+            <div class="course-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+          </div>
+        </div>
+        <a class="course-btn-paid" href="#">Купить</a>
+      </div>
+      <div class="course-row">
+        <div class="course-left">
+          <div class="course-num" style="background:#f5f5f5;color:#1a1a1a;">2</div>
+          <div class="course-info">
+            <div class="course-tag">Курс 2</div>
+            <div class="course-title">Вода и Металл — Глубина и точность</div>
+            <div class="course-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+          </div>
+        </div>
+        <a class="course-btn-paid" href="#">Купить</a>
+      </div>
+      <div class="course-row">
+        <div class="course-left">
+          <div class="course-num" style="background:#f5f5f5;color:#1a1a1a;">3</div>
+          <div class="course-info">
+            <div class="course-tag">Курс 3</div>
+            <div class="course-title">Земля — Опора и равновесие</div>
+            <div class="course-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+          </div>
+        </div>
+        <a class="course-btn-paid" href="#">Купить</a>
+      </div>
+      <div class="course-row">
+        <div class="course-left">
+          <div class="course-num" style="background:#f5f5f5;color:#1a1a1a;">4</div>
+          <div class="course-info">
+            <div class="course-tag">Курс 4</div>
+            <div class="course-title">Взаимодействие стихий — Система</div>
+            <div class="course-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</div>
+          </div>
+        </div>
+        <a class="course-btn-paid" href="#">Купить</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI QUIZ -->
+  <div class="quiz-wrap">
+    <div class="quiz-inner">
+      <div class="section-label">Мини-тест</div>
+      <div class="section-title">Найди свою стихию</div>
+      <div class="section-sub">Выбери то, что тебе ближе всего прямо сейчас.</div>
+      <div class="quiz-options">
+        <button class="quiz-opt" onclick="pickQuiz(this,'fire')">Хочу действовать</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'tree')">Хочу строить</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'water')">Хочу понять</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'metal')">Хочу порядка</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'earth')">Хочу стабильности</button>
+      </div>
+      <div class="quiz-result" id="quiz-result"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap">
+    <h2>Начни с бесплатного курса</h2>
+    <p>Регистрация занимает 30 секунд. Первый урок — уже сегодня.</p>
+    <a class="btn-dark" href="{% url 'accounts:register' %}">Начать бесплатно</a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    © 2026 MetaMindGym
+  </div>
+</div>
+
+<script>
+const elData = {
+  fire:  { name:'Огонь', color:'#E8703A' },
+  tree:  { name:'Дерево', color:'#4CAF50' },
+  water: { name:'Вода', color:'#2196F3' },
+  metal: { name:'Металл', color:'#9E9E9E' },
+  earth: { name:'Земля', color:'#A0784A' },
+};
+const quizTexts = {
+  fire:  'Твоя стихия — <strong>Огонь</strong>. Ты прирождённый лидер. Тебе нужно движение, вызов и признание. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+  tree:  'Твоя стихия — <strong>Дерево</strong>. Ты мыслишь долгосрочно и умеешь терпеть ради результата. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+  water: 'Твоя стихия — <strong>Вода</strong>. Ты глубоко чувствуешь и умеешь находить обходные пути. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+  metal: 'Твоя стихия — <strong>Металл</strong>. Ты ценишь чёткость и держишь высокую планку. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+  earth: 'Твоя стихия — <strong>Земля</strong>. Ты — опора для других. Стабильный, надёжный, заботливый. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.',
+};
+
+function selectEl(card) {
+  document.querySelectorAll('.el-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+}
+
+function pickQuiz(btn, type) {
+  document.querySelectorAll('.quiz-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const res = document.getElementById('quiz-result');
+  res.innerHTML = quizTexts[type];
+  res.classList.add('show');
+}
+</script>
 
 {% endblock %}
