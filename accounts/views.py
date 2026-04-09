@@ -2,6 +2,7 @@ import os
 import zipfile
 import shutil
 import threading
+from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
@@ -422,9 +423,14 @@ def admin_calendar(request):
     from datetime import date
     slots = AvailableSlot.objects.filter(date__gte=date.today()).order_by('date', 'time')
     form = SlotForm()
+    weekdays = [
+        (0, 'Пн'), (1, 'Вт'), (2, 'Ср'),
+        (3, 'Чт'), (4, 'Пт'), (5, 'Сб'), (6, 'Вс')
+    ]
     return render(request, 'admin_panel/calendar.html', {
         'slots': slots,
         'form': form,
+        'weekdays': weekdays,
     })
 
 
@@ -438,6 +444,116 @@ def slot_add(request):
             messages.success(request, 'Слот добавлен')
         else:
             messages.error(request, 'Ошибка — возможно такой слот уже существует')
+    return redirect('accounts:admin_calendar')
+
+
+@login_required
+@site_admin_required
+def slot_bulk_add(request):
+    if request.method == 'POST':
+        date_str = request.POST.get('date')
+        time_from_str = request.POST.get('time_from')
+        time_to_str = request.POST.get('time_to')
+
+        if not all([date_str, time_from_str, time_to_str]):
+            messages.error(request, 'Заполни все поля')
+            return redirect('accounts:admin_calendar')
+
+        try:
+            slot_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            time_from = datetime.strptime(time_from_str, '%H:%M').time()
+            time_to = datetime.strptime(time_to_str, '%H:%M').time()
+        except ValueError:
+            messages.error(request, 'Неверный формат даты или времени')
+            return redirect('accounts:admin_calendar')
+
+        if time_from >= time_to:
+            messages.error(request, 'Время начала должно быть раньше времени конца')
+            return redirect('accounts:admin_calendar')
+
+        created = 0
+        skipped = 0
+        current = datetime.combine(slot_date, time_from)
+        end = datetime.combine(slot_date, time_to)
+
+        while current < end:
+            slot_time = current.time()
+            _, was_created = AvailableSlot.objects.get_or_create(
+                date=slot_date,
+                time=slot_time,
+            )
+            if was_created:
+                created += 1
+            else:
+                skipped += 1
+            current += timedelta(minutes=30)
+
+        msg = f'Создано {created} слотов'
+        if skipped:
+            msg += f', пропущено {skipped} (уже существуют)'
+        messages.success(request, msg)
+
+    return redirect('accounts:admin_calendar')
+
+
+@login_required
+@site_admin_required
+def slot_week_add(request):
+    if request.method == 'POST':
+        weekdays = request.POST.getlist('weekdays')
+        time_from_str = request.POST.get('time_from')
+        time_to_str = request.POST.get('time_to')
+        weeks = int(request.POST.get('weeks', 1))
+
+        if not weekdays or not time_from_str or not time_to_str:
+            messages.error(request, 'Заполни все поля')
+            return redirect('accounts:admin_calendar')
+
+        try:
+            time_from = datetime.strptime(time_from_str, '%H:%M').time()
+            time_to = datetime.strptime(time_to_str, '%H:%M').time()
+            weekdays = [int(d) for d in weekdays]
+        except ValueError:
+            messages.error(request, 'Неверный формат')
+            return redirect('accounts:admin_calendar')
+
+        if time_from >= time_to:
+            messages.error(request, 'Время начала должно быть раньше времени конца')
+            return redirect('accounts:admin_calendar')
+
+        from datetime import date
+        today = date.today()
+        created = 0
+        skipped = 0
+
+        for week in range(weeks):
+            for weekday in weekdays:
+                days_ahead = weekday - today.weekday()
+                if days_ahead < 0:
+                    days_ahead += 7
+                if week == 0 and days_ahead == 0:
+                    days_ahead = 0
+                slot_date = today + timedelta(days=days_ahead + week * 7)
+
+                current = datetime.combine(slot_date, time_from)
+                end = datetime.combine(slot_date, time_to)
+
+                while current < end:
+                    _, was_created = AvailableSlot.objects.get_or_create(
+                        date=slot_date,
+                        time=current.time(),
+                    )
+                    if was_created:
+                        created += 1
+                    else:
+                        skipped += 1
+                    current += timedelta(minutes=30)
+
+        msg = f'Создано {created} слотов'
+        if skipped:
+            msg += f', пропущено {skipped} (уже существуют)'
+        messages.success(request, msg)
+
     return redirect('accounts:admin_calendar')
 
 

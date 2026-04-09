@@ -8,17 +8,152 @@
         <div>
             <a href="{% url 'accounts:admin_panel' %}" class="text-gray-400 hover:text-dark transition text-sm">← Панель</a>
             <h1 class="text-xl sm:text-2xl font-bold text-dark mt-2">Управление календарём</h1>
-            <p class="text-gray-400 text-sm mt-1">Добавляй свободные слоты — пользователи будут видеть и бронировать их</p>
+            <p class="text-gray-400 text-sm mt-1">Добавляй слоты — пользователи будут видеть и бронировать их</p>
         </div>
         <a href="{% url 'accounts:admin_meetings' %}"
             class="shrink-0 border border-border-main px-4 py-2 rounded-lg text-sm text-gray-500 hover:text-dark hover:border-gray-400 transition bg-white text-center">
             Все записи →
         </a>
     </div>
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-6 mb-4">
+        <h2 class="text-base font-semibold text-dark mb-1">Создать расписание на несколько недель</h2>
+        <p class="text-xs text-gray-400 mb-4">Выбери дни недели, диапазон времени и количество недель — слоты создадутся автоматически</p>
 
-    <!-- Добавить слот -->
+        <form method="POST" action="{% url 'accounts:slot_week_add' %}">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="block text-sm text-gray-500 mb-2">Дни недели</label>
+                <div class="flex gap-2 flex-wrap">
+                    {% for day_num, day_name in weekdays %}
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" name="weekdays" value="{{ day_num }}"
+                            class="w-4 h-4 accent-dark">
+                        <span class="text-sm text-dark">{{ day_name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="button" onclick="selectWeekdays([0,1,2,3,4])"
+                        class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                        Пн–Пт
+                    </button>
+                    <button type="button" onclick="selectWeekdays([0,1,2,3,4,5,6])"
+                        class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                        Все дни
+                    </button>
+                    <button type="button" onclick="selectWeekdays([])"
+                        class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                        Сбросить
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 sm:items-end flex-wrap">
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1.5">С</label>
+                    <input type="time" name="time_from" id="week-from" value="10:00"
+                        class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1.5">До</label>
+                    <input type="time" name="time_to" id="week-to" value="16:00"
+                        class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1.5">Недель вперёд</label>
+                    <select name="weeks"
+                        class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+                        <option value="1">1 неделя</option>
+                        <option value="2">2 недели</option>
+                        <option value="3">3 недели</option>
+                        <option value="4" selected>4 недели</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-500 mb-1.5 invisible">.</label>
+                    <button type="submit"
+                        class="bg-dark text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-2 transition text-sm whitespace-nowrap">
+                        Создать расписание
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-border-main">
+                <p class="text-xs text-gray-400 mb-2">Быстрые пресеты:</p>
+                <button type="button" onclick="setWeekPreset('09:00','13:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Утро 9:00–13:00
+                </button>
+                <button type="button" onclick="setWeekPreset('13:00','17:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    День 13:00–17:00
+                </button>
+                <button type="button" onclick="setWeekPreset('10:00','18:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Рабочий день 10:00–18:00
+                </button>
+                <button onclick="setPreset('17:00','21:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Вечер 17:00–21:00
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-6 mb-4">
+        <h2 class="text-base font-semibold text-dark mb-1">Добавить слоты на день</h2>
+        <p class="text-xs text-gray-400 mb-4">Выбери день и диапазон времени — создадутся слоты по 30 минут автоматически</p>
+        <form method="POST" action="{% url 'accounts:slot_bulk_add' %}" class="flex flex-col sm:flex-row gap-3 sm:items-end flex-wrap">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">Дата</label>
+                <input type="date" name="date" id="bulk-date"
+                    class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">С</label>
+                <input type="time" name="time_from" id="bulk-from" value="10:00"
+                    class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div>
+                <label class="block text-sm text-gray-500 mb-1.5">До</label>
+                <input type="time" name="time_to" id="bulk-to" value="16:00"
+                    class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
+            </div>
+            <div class="flex flex-col gap-1">
+                <label class="block text-sm text-gray-500 mb-1.5 invisible">.</label>
+                <button type="submit"
+                    class="bg-dark text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-2 transition text-sm whitespace-nowrap">
+                    + Создать слоты
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-4 pt-4 border-t border-border-main">
+            <p class="text-xs text-gray-400 mb-2">Быстрые пресеты:</p>
+            <div class="flex gap-2 flex-wrap">
+                <button onclick="setPreset('09:00','13:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Утро 9:00–13:00
+                </button>
+                <button onclick="setPreset('13:00','17:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    День 13:00–17:00
+                </button>
+                <button onclick="setPreset('10:00','18:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Рабочий день 10:00–18:00
+                </button>
+                <button onclick="setPreset('17:00','21:00')"
+                    class="text-xs border border-border-main px-3 py-1.5 rounded-lg hover:border-gray-400 text-gray-500 hover:text-dark transition">
+                    Вечер 17:00–21:00
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="bg-white border border-border-main rounded-2xl p-5 sm:p-6 mb-5 sm:mb-6">
-        <h2 class="text-base font-semibold text-dark mb-4">Добавить свободный слот</h2>
+        <h2 class="text-base font-semibold text-dark mb-4">Добавить один слот</h2>
         <form method="POST" action="{% url 'accounts:slot_add' %}" class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
             {% csrf_token %}
             <div class="flex-1">
@@ -27,49 +162,52 @@
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
             </div>
             <div class="flex-1">
-                <label class="block text-sm text-gray-500 mb-1.5">Время начала</label>
+                <label class="block text-sm text-gray-500 mb-1.5">Время</label>
                 <input type="time" name="time"
                     class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark">
             </div>
             <button type="submit"
-                class="w-full sm:w-auto bg-dark text-white px-6 py-3 rounded-xl font-medium hover:bg-dark-2 transition text-sm">
-                + Добавить слот
+                class="w-full sm:w-auto border border-border-main text-gray-500 hover:text-dark hover:border-gray-400 px-6 py-3 rounded-xl font-medium transition text-sm">
+                + Добавить
             </button>
         </form>
     </div>
 
-    <!-- Список слотов -->
     <div class="bg-white border border-border-main rounded-2xl overflow-hidden">
-        <div class="px-5 sm:px-6 py-4 border-b border-border-main bg-surface-2">
+        <div class="px-5 sm:px-6 py-4 border-b border-border-main bg-surface-2 flex items-center justify-between">
             <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider">Предстоящие слоты</h2>
+            <span class="text-xs text-gray-400">{{ slots|length }} слотов</span>
         </div>
 
-        <!-- Mobile: cards -->
         <div class="sm:hidden divide-y divide-surface-2">
-            {% for slot in slots %}
-            <div class="flex items-center justify-between px-5 py-4 gap-3">
-                <div>
-                    <p class="font-medium text-dark text-sm">{{ slot.date }}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ slot.time }} · 1 час</p>
-                </div>
+            {% regroup slots by date as slots_by_date %}
+            {% for day in slots_by_date %}
+            <div class="px-5 py-3 bg-surface-2 border-b border-border-main">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ day.grouper }}</p>
+            </div>
+            {% for slot in day.list %}
+            <div class="flex items-center justify-between px-5 py-3 gap-3">
                 <div class="flex items-center gap-3">
+                    <p class="font-medium text-dark text-sm">{{ slot.time }}</p>
                     {% if slot.is_booked %}
-                        <span class="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-2 py-1 rounded-full">Занято</span>
+                        <span class="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-2 py-0.5 rounded-full">Занято</span>
                     {% else %}
-                        <span class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-1 rounded-full">Свободно</span>
-                        <form method="POST" action="{% url 'accounts:slot_delete' slot.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="text-red-400 hover:text-red-600 transition text-xs">✕</button>
-                        </form>
+                        <span class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded-full">Свободно</span>
                     {% endif %}
                 </div>
+                {% if not slot.is_booked %}
+                <form method="POST" action="{% url 'accounts:slot_delete' slot.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="text-red-400 hover:text-red-600 transition text-xs">✕</button>
+                </form>
+                {% endif %}
             </div>
+            {% endfor %}
             {% empty %}
             <div class="px-5 py-12 text-center text-gray-400 text-sm">Слотов нет — добавь первый выше</div>
             {% endfor %}
         </div>
 
-        <!-- Desktop: table -->
         <table class="hidden sm:table w-full text-sm">
             <thead class="border-b border-border-main">
                 <tr class="text-gray-400">
@@ -81,19 +219,26 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-surface-2">
-                {% for slot in slots %}
+                {% regroup slots by date as slots_by_date %}
+                {% for day in slots_by_date %}
+                <tr class="bg-surface-2">
+                    <td colspan="5" class="px-6 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        {{ day.grouper }}
+                    </td>
+                </tr>
+                {% for slot in day.list %}
                 <tr class="hover:bg-surface-2 transition">
-                    <td class="px-6 py-4 font-medium text-dark">{{ slot.date }}</td>
-                    <td class="px-6 py-4 text-dark">{{ slot.time }}</td>
-                    <td class="px-6 py-4 text-gray-400">1 час</td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-3 text-gray-400 text-xs">—</td>
+                    <td class="px-6 py-3 font-medium text-dark">{{ slot.time }}</td>
+                    <td class="px-6 py-3 text-gray-400">30 мин</td>
+                    <td class="px-6 py-3">
                         {% if slot.is_booked %}
                             <span class="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-2 py-1 rounded-full">Занято</span>
                         {% else %}
                             <span class="text-xs bg-green-50 text-green-600 border border-green-200 px-2 py-1 rounded-full">Свободно</span>
                         {% endif %}
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-3">
                         {% if not slot.is_booked %}
                         <form method="POST" action="{% url 'accounts:slot_delete' slot.id %}">
                             {% csrf_token %}
@@ -102,6 +247,7 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% endfor %}
                 {% empty %}
                 <tr>
                     <td colspan="5" class="px-6 py-12 text-center text-gray-400">Слотов нет — добавь первый выше</td>
@@ -112,4 +258,22 @@
     </div>
 
 </div>
+
+<script>
+function setPreset(from, to) {
+    document.getElementById('bulk-from').value = from;
+    document.getElementById('bulk-to').value = to;
+}
+function setWeekPreset(from, to) {
+    document.getElementById('week-from').value = from;
+    document.getElementById('week-to').value = to;
+}
+
+function selectWeekdays(days) {
+    document.querySelectorAll('input[name="weekdays"]').forEach(cb => {
+        cb.checked = days.includes(parseInt(cb.value));
+    });
+}
+</script>
+
 {% endblock %}
