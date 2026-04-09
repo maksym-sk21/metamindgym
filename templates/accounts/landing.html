@@ -403,32 +403,27 @@
       <div class="el-card fire" onclick="selectEl(this)">
         <div class="el-icon">🔥</div>
         <div class="el-tagline">Fuego</div>
-        <div class="el-name">Líder</div>
         <div class="el-desc">Fuego — es la idea, el deseo, el pensamiento “quiero”, la motivación. Al mismo tiempo, es una persona creativa, carismática, ambiciosa y orientada a resultados rápidos.</div>
-      </div>
-      <div class="el-card tree" onclick="selectEl(this)">
-        <div class="el-icon">🌿</div>
-        <div class="el-tagline">Madera</div>
-        <div class="el-name">Creador</div>
-        <div class="el-desc"> Madera — resultado, dinero, reconocimiento, materialización de lo deseado. Son personas que han pasado por mucho y entienden que el resultado no es perfecto, igual que no existen árboles perfectos.</div>
-      </div>
-      <div class="el-card water" onclick="selectEl(this)">
-        <div class="el-icon">💧</div>
-        <div class="el-tagline">Agua</div>
-        <div class="el-name">Pensador</div>
-        <div class="el-desc">Agua — profundidad, conexión con uno mismo, con los demás y con la realidad, vínculos y adaptación. Personas que entienden y sienten a otros, y que interpretan el mundo desde la profundidad de su experiencia y visión.</div>
-      </div>
-      <div class="el-card metal" onclick="selectEl(this)">
-        <div class="el-icon">⚙️</div>
-        <div class="el-tagline">Metal</div>
-        <div class="el-name">Perfeccionista</div>
-        <div class="el-desc">Metal — estructura, sistema, orden, límites y reglas. Personas de sistema y estructura, que cumplen perfectamente con sus responsabilidades y a veces tienden al perfeccionismo.</div>
       </div>
       <div class="el-card earth" onclick="selectEl(this)">
         <div class="el-icon">🌍</div>
         <div class="el-tagline">Tierra</div>
-        <div class="el-name">Apoyo</div>
         <div class="el-desc">Tierra — son los primeros pasos, prueba y error, experimentos, riesgos, conocimientos y habilidades. Son personas capaces de contener mucho conocimiento y crear una base para sí mismas y para otros, personas que cuidan de los demás, como la tierra.</div>
+      </div>
+      <div class="el-card metal" onclick="selectEl(this)">
+        <div class="el-icon">⚙️</div>
+        <div class="el-tagline">Metal</div>
+        <div class="el-desc">Metal — estructura, sistema, orden, límites y reglas. Personas de sistema y estructura, que cumplen perfectamente con sus responsabilidades y a veces tienden al perfeccionismo.</div>
+      </div>
+      <div class="el-card water" onclick="selectEl(this)">
+        <div class="el-icon">💧</div>
+        <div class="el-tagline">Agua</div>
+        <div class="el-desc">Agua — profundidad, conexión con uno mismo, con los demás y con la realidad, vínculos y adaptación. Personas que entienden y sienten a otros, y que interpretan el mundo desde la profundidad de su experiencia y visión.</div>
+      </div>
+      <div class="el-card tree" onclick="selectEl(this)">
+        <div class="el-icon">🌿</div>
+        <div class="el-tagline">Madera</div>
+        <div class="el-desc"> Madera — resultado, dinero, reconocimiento, materialización de lo deseado. Son personas que han pasado por mucho y entienden que el resultado no es perfecto, igual que no existen árboles perfectos.</div>
       </div>
     </div>
   </div>
@@ -441,7 +436,7 @@
       <div class="steps">
         <div class="step">
           <div class="step-num">1</div>
-          <p>Regístrate en el gimnasio mental (es gratis y sin compromisos)</p>
+          <p>Regístrate en el gimnasio mental</p>
         </div>
         <div class="step">
           <div class="step-num">2</div>
@@ -449,7 +444,7 @@
         </div>
         <div class="step">
           <div class="step-num">3</div>
-          <p>Elige el curso adecuado.</p>
+          <p>Elige el curso.</p>
         </div>
         <div class="step">
           <div class="step-num">4</div>
@@ -535,10 +530,10 @@
       <div class="section-sub">elige el pensamiento que aparece primero en tu mente:</div>
       <div class="quiz-options">
         <button class="quiz-opt" onclick="pickQuiz(this,'fire')">Quiero aprender algo nuevo</button>
-        <button class="quiz-opt" onclick="pickQuiz(this,'tree')">Quiero estabilidad y tranquilidad</button>
-        <button class="quiz-opt" onclick="pickQuiz(this,'water')">Quiero hacer lo que me gusta</button>
-        <button class="quiz-opt" onclick="pickQuiz(this,'metal')">Quiero entenderme a mí mismo y a los demás</button>
-        <button class="quiz-opt" onclick="pickQuiz(this,'earth')">Quiero crecimiento y resultados</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'earth')">Quiero estabilidad y tranquilidad</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'metal')">Quiero hacer lo que me gusta</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'water')">Quiero entenderme a mí mismo y a los demás</button>
+        <button class="quiz-opt" onclick="pickQuiz(this,'tree')">Quiero crecimiento y resultados</button>
       </div>
       <div class="quiz-result" id="quiz-result"></div>
     </div>
