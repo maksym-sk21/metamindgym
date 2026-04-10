@@ -10,9 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='lessonvideo',
-            name='description',
-            field=models.TextField(blank=True, verbose_name='Описание видео'),
-        ),
+        migrations.RunSQL(
+            sql="""
+                    ALTER TABLE courses_lessonvideo
+                    ADD COLUMN IF NOT EXISTS description TEXT;
+                    """,
+            reverse_sql="""
+                    ALTER TABLE courses_lessonvideo
+                    DROP COLUMN IF EXISTS description;
+                    """
+        )
     ]
