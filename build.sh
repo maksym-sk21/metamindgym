@@ -5,6 +5,7 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 python manage.py migrate --fake-initial
+python manage.py migrate courses 0002 --fake
 python manage.py migrate courses 0003 --fake
 python manage.py migrate courses 0004 --fake
 python manage.py migrate
