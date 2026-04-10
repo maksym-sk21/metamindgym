@@ -11,17 +11,16 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            sql="ALTER TABLE courses_lesson DROP COLUMN IF EXISTS tilda_url;",
-            reverse_sql="ALTER TABLE courses_lesson ADD COLUMN tilda_url varchar(200);"
-        ),
-        migrations.AddField(
-            model_name='lesson',
-            name='tilda_path',
-            field=models.CharField(blank=True, max_length=500, verbose_name='Путь к странице Tilda'),
-        ),
-        migrations.AddField(
-            model_name='lesson',
-            name='zip_file',
-            field=models.FileField(blank=True, null=True, upload_to='lessons_zip/', verbose_name='ZIP архив'),
-        ),
+            sql="""
+                ALTER TABLE courses_lesson
+                DROP COLUMN IF EXISTS tilda_url;
+
+                ALTER TABLE courses_lesson
+                ADD COLUMN IF NOT EXISTS tilda_path varchar(500);
+
+                ALTER TABLE courses_lesson
+                ADD COLUMN IF NOT EXISTS zip_file varchar(255);
+            """,
+            reverse_sql=""
+        )
     ]
