@@ -10,9 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='meeting',
-            name='meet_link',
-            field=models.URLField(blank=True, verbose_name='Ссылка на встречу (Google Meet)'),
-        ),
+        migrations.RunSQL(
+            sql="""
+                ALTER TABLE courses_meeting
+                ADD COLUMN IF NOT EXISTS meet_link varchar(255);
+            """,
+            reverse_sql="""
+                ALTER TABLE courses_meeting
+                DROP COLUMN IF EXISTS meet_link;
+            """
+        )
     ]
