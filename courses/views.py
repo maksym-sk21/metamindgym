@@ -2,9 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.conf import settings
 from .models import Course, Lesson, UserCourse, AvailableSlot, Meeting
 import json
+import stripe
 from .notifications import notify_new_meeting
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def get_user_accessible_courses(user):
@@ -57,39 +61,61 @@ def book_meeting(request, course_id, lesson_id):
         messages.error(request, 'No tienes acceso a este curso')
         return redirect('accounts:dashboard')
 
+    existing_meeting = Meeting.objects.filter(user=request.user, lesson=lesson).first()
+
     if request.method == 'POST':
         slot_id = request.POST.get('slot_id')
         comment = request.POST.get('comment', '')
-        slot = get_object_or_404(AvailableSlot, id=slot_id, is_booked=False)
 
-        if Meeting.objects.filter(user=request.user, lesson=lesson).exists():
+        if existing_meeting:
             messages.error(request, 'Ya tienes una reunión reservada para esta lección')
             return redirect('courses:course_detail', course_id=course.id)
 
-        meeting = Meeting.objects.create(
-            user=request.user,
-            lesson=lesson,
-            slot=slot,
-            comment=comment,
+        slot = get_object_or_404(AvailableSlot, id=slot_id, is_booked=False)
+
+        success_url = request.build_absolute_uri(
+            f'/courses/{course_id}/lessons/{lesson_id}/book/success/?session_id={{CHECKOUT_SESSION_ID}}'
         )
-        slot.is_booked = True
-        slot.save()
+        cancel_url = request.build_absolute_uri(
+            f'/courses/{course_id}/lessons/{lesson_id}/book/'
+        )
 
-        admin_url = request.build_absolute_uri('/admin-panel/meetings/')
-        notify_new_meeting(meeting, admin_url)
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': settings.STRIPE_MEETING_PRICE_ID,
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            customer_email=request.user.email,
+            metadata={
+                'type': 'meeting',
+                'user_id': str(request.user.id),
+                'lesson_id': str(lesson.id),
+                'slot_id': str(slot.id),
+                'comment': comment,
+            }
+        )
 
-        messages.success(request, f'Reunión reservada para el {slot.date} a las {slot.time}')
-        return redirect('courses:course_detail', course_id=course.id)
+        return redirect(checkout_session.url, permanent=False)
 
     slots = AvailableSlot.objects.filter(is_booked=False).order_by('date', 'time')
-    existing_meeting = Meeting.objects.filter(user=request.user, lesson=lesson).first()
 
     return render(request, 'courses/book_meeting.html', {
         'course': course,
         'lesson': lesson,
         'slots': slots,
         'existing_meeting': existing_meeting,
+        'meeting_price_id': settings.STRIPE_MEETING_PRICE_ID,
     })
+
+
+@login_required
+def book_meeting_success(request, course_id, lesson_id):
+    messages.success(request, '¡Pago realizado! Tu reunión ha sido reservada.')
+    return redirect('courses:course_detail', course_id=course_id)
 
 
 @login_required
@@ -104,4 +130,3 @@ def get_slots(request):
     ).values('id', 'time')
 
     return JsonResponse({'slots': list(slots)})
-

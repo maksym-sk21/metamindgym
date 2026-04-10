@@ -150,6 +150,11 @@ class Meeting(models.Model):
         ('cancelled', 'Cancelada'),
     ]
 
+    PAYMENT_STATUS_CHOICES = [
+        ('unpaid', 'Не оплачена'),
+        ('paid', 'Оплачена'),
+    ]
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -166,6 +171,12 @@ class Meeting(models.Model):
         related_name='meeting'
     )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PAYMENT_STATUS_CHOICES,
+        default='unpaid',
+        verbose_name='Статус оплаты'
+    )
     comment = models.TextField(blank=True, verbose_name='Комментарий пользователя')
     created_at = models.DateTimeField(auto_now_add=True)
     meet_link = models.URLField(blank=True, verbose_name='Ссылка на встречу (Google Meet)')

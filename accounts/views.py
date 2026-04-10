@@ -29,7 +29,9 @@ import boto3
 from botocore.config import Config
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
+import logging
 
+logger = logging.getLogger(__name__)
 
 def landing(request):
     if request.user.is_authenticated:
@@ -642,25 +644,108 @@ def stripe_webhook(request):
 
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
-    except (ValueError, stripe.error.SignatureVerificationError):
+    except Exception as e:
+        logger.error(f'Webhook signature error: {e}')
         return HttpResponse(status=400)
+
+    logger.info(f'Webhook received: {event["type"]}')
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        user_id = session['metadata'].get('user_id')
-        course_id = session['metadata'].get('course_id')
 
-        if user_id and course_id:
-            from accounts.models import User
-            try:
-                user = User.objects.get(id=user_id)
-                course = Course.objects.get(id=course_id)
-                UserCourse.objects.get_or_create(
-                    user=user,
-                    course=course,
-                    defaults={'stripe_payment_intent': session.get('payment_intent', '')}
-                )
-            except (User.DoesNotExist, Course.DoesNotExist):
-                pass
+        meta = session.metadata.to_dict() if session.metadata else {}
+        payment_type = meta.get('type', 'course')
+
+        logger.info(f'Metadata: {meta}')
+
+        if payment_type == 'meeting':
+            _handle_meeting_payment(session, meta)
+        else:
+            _handle_course_payment(session, meta)
 
     return HttpResponse(status=200)
+
+
+def _handle_course_payment(session, meta):
+    from accounts.models import User
+
+    user_id = meta.get('user_id')
+    course_id = meta.get('course_id')
+
+    if not user_id or not course_id:
+        logger.error('Course payment: missing metadata')
+        return
+
+    try:
+        from courses.models import Course, UserCourse
+
+        user = User.objects.get(id=user_id)
+        course = Course.objects.get(id=course_id)
+
+        UserCourse.objects.get_or_create(
+            user=user,
+            course=course,
+            defaults={
+                'stripe_payment_intent': session.payment_intent or ''
+            }
+        )
+
+        logger.info(f'Course access granted: user={user_id}, course={course_id}')
+
+    except Exception as e:
+        logger.error(f'Course payment error: {e}')
+
+
+def _handle_meeting_payment(session, meta):
+    from accounts.models import User
+    from courses.notifications import notify_new_meeting
+    from django.conf import settings as django_settings
+
+    user_id = meta.get('user_id')
+    lesson_id = meta.get('lesson_id')
+    slot_id = meta.get('slot_id')
+    comment = meta.get('comment', '')
+
+    logger.info(f'Handle meeting: user={user_id}, lesson={lesson_id}, slot={slot_id}')
+
+    if not all([user_id, lesson_id, slot_id]):
+        logger.error('Meeting payment: missing metadata')
+        return
+
+    try:
+        user = User.objects.get(id=user_id)
+        lesson = Lesson.objects.get(id=lesson_id)
+        slot = AvailableSlot.objects.get(id=slot_id)
+
+        logger.info(f'Slot found: {slot.id}, booked={slot.is_booked}')
+
+        if slot.is_booked:
+            logger.warning('Slot already booked')
+            return
+
+        if Meeting.objects.filter(user=user, lesson=lesson).exists():
+            logger.warning('User already has meeting for this lesson')
+            return
+
+        if Meeting.objects.filter(slot=slot).exists():
+            logger.warning('Slot already has meeting')
+            return
+
+        meeting = Meeting.objects.create(
+            user=user,
+            lesson=lesson,
+            slot=slot,
+            comment=comment,
+            payment_status='paid',
+        )
+
+        slot.is_booked = True
+        slot.save()
+
+        logger.info(f'Meeting created: {meeting.id}')
+
+        admin_url = f'https://{django_settings.ALLOWED_HOSTS[0]}/admin-panel/meetings/'
+        notify_new_meeting(meeting, admin_url)
+
+    except Exception as e:
+        logger.error(f'Meeting payment error: {e}')

@@ -17,16 +17,23 @@
                 <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-4 text-xl sm:text-2xl">✓</div>
                 <p class="font-semibold text-dark mb-1">Reunión programada</p>
                 <p class="text-gray-400 text-sm">{{ existing_meeting.slot.date }} a las {{ existing_meeting.slot.time }}</p>
-                <span class="inline-block mt-3 text-xs px-3 py-1 rounded-full border
-                    {% if existing_meeting.status == 'confirmed' %}border-green-200 text-green-600 bg-green-50
-                    {% elif existing_meeting.status == 'cancelled' %}border-red-200 text-red-500 bg-red-50
-                    {% else %}border-border-main text-gray-500 bg-surface-2{% endif %}">
-                    {{ existing_meeting.get_status_display }}
-                </span>
+                <div class="flex items-center justify-center gap-3 mt-3 flex-wrap">
+                    <span class="text-xs px-3 py-1 rounded-full border
+                        {% if existing_meeting.status == 'confirmed' %}border-green-200 text-green-600 bg-green-50
+                        {% elif existing_meeting.status == 'cancelled' %}border-red-200 text-red-500 bg-red-50
+                        {% else %}border-border-main text-gray-500 bg-surface-2{% endif %}">
+                        {{ existing_meeting.get_status_display }}
+                    </span>
+                    <span class="text-xs px-3 py-1 rounded-full border
+                        {% if existing_meeting.payment_status == 'paid' %}border-green-200 text-green-600 bg-green-50
+                        {% else %}border-yellow-200 text-yellow-600 bg-yellow-50{% endif %}">
+                        {% if existing_meeting.payment_status == 'paid' %}Pagada{% else %}Sin pagar{% endif %}
+                    </span>
+                </div>
             </div>
 
         {% elif slots %}
-            <form method="POST" class="space-y-5 sm:space-y-6">
+            <form method="POST" id="booking-form" class="space-y-5 sm:space-y-6">
                 {% csrf_token %}
 
                 <div>
@@ -55,10 +62,18 @@
                         class="w-full bg-surface-2 border border-border-main rounded-xl px-4 py-3 focus:outline-none focus:border-gray-400 transition text-sm text-dark"></textarea>
                 </div>
 
+                <div class="bg-surface-2 border border-border-main rounded-xl px-4 py-3 flex items-center justify-between">
+                    <span class="text-sm text-gray-500">Coste de la consulta</span>
+                    <span class="font-semibold text-dark text-sm" id="meeting-price-display">€ 30</span>
+                </div>
+
                 <button type="submit" id="submit-btn" disabled
                     class="w-full bg-dark text-white py-3 rounded-xl font-bold hover:bg-dark-2 transition text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-                    Reservar
+                    Pagar y reservar →
                 </button>
+                <p class="text-xs text-gray-400 text-center">
+                    Serás redirigido a Stripe para completar el pago de forma segura
+                </p>
             </form>
 
         {% else %}
