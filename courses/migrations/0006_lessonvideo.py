@@ -11,19 +11,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='LessonVideo',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=200, verbose_name='Название видео')),
-                ('video_file', models.FileField(upload_to='lesson_videos/', verbose_name='Видео файл')),
-                ('order', models.PositiveIntegerField(default=0, verbose_name='Порядок')),
-                ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='videos', to='courses.lesson')),
-            ],
-            options={
-                'verbose_name': 'Видео урока',
-                'verbose_name_plural': 'Видео уроков',
-                'ordering': ['order'],
-            },
-        ),
+        migrations.RunSQL(
+            sql="""
+                    CREATE TABLE IF NOT EXISTS courses_lessonvideo (
+                        id BIGSERIAL PRIMARY KEY,
+                        title VARCHAR(200) NOT NULL,
+                        video_file VARCHAR(100) NOT NULL,
+                        "order" INTEGER NOT NULL DEFAULT 0,
+                        lesson_id BIGINT NOT NULL REFERENCES courses_lesson(id) ON DELETE CASCADE
+                    );
+                    """,
+            reverse_sql="DROP TABLE IF EXISTS courses_lessonvideo;"
+        )
     ]
