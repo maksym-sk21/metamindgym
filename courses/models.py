@@ -151,8 +151,8 @@ class Meeting(models.Model):
     ]
 
     PAYMENT_STATUS_CHOICES = [
-        ('unpaid', 'Не оплачена'),
-        ('paid', 'Оплачена'),
+        ('unpaid', 'No se paga'),
+        ('paid', 'Pagado'),
     ]
 
     user = models.ForeignKey(
