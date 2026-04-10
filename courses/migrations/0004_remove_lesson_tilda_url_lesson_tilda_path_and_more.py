@@ -10,9 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='lesson',
-            name='tilda_url',
+        migrations.RunSQL(
+            sql="ALTER TABLE courses_lesson DROP COLUMN IF EXISTS tilda_url;",
+            reverse_sql="ALTER TABLE courses_lesson ADD COLUMN tilda_url varchar(200);"
         ),
         migrations.AddField(
             model_name='lesson',
