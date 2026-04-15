@@ -6,10 +6,15 @@ from .models import User
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(label='Email')
     username = forms.CharField(label='Имя пользователя')
+    phone = forms.CharField(
+        label='Телефон',
+        max_length=20,
+        widget=forms.TextInput(attrs={'placeholder': '+1234567890'}),
+    )
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password1', 'password2')
+        fields = ('email', 'username', 'phone', 'password1', 'password2')
 
 
 class LoginForm(forms.Form):
