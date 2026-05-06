@@ -9,6 +9,10 @@ class Course(models.Model):
         ('paid_2', 'Curso 2'),
         ('paid_3', 'Curso 3'),
         ('paid_4', 'Curso 4'),
+        ('paid_5', 'Curso 5'),
+        ('paid_6', 'Curso 6'),
+        ('paid_7', 'Curso 7'),
+        ('paid_8', 'Curso 8'),
     ]
 
     title = models.CharField(max_length=200, verbose_name='Название')
