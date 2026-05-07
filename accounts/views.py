@@ -409,6 +409,29 @@ def video_add(request, lesson_pk):
 
 @login_required
 @site_admin_required
+@require_POST
+def video_update(request, pk):
+    video = get_object_or_404(LessonVideo, pk=pk)
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'error': 'invalid json'}, status=400)
+
+    title = data.get('title', '').strip()
+    description = data.get('description', '').strip()
+
+    if not title:
+        return JsonResponse({'error': 'title required'}, status=400)
+
+    video.title = title
+    video.description = description
+    video.save(update_fields=['title', 'description'])
+
+    return JsonResponse({'ok': True, 'title': video.title, 'description': video.description})
+
+
+@login_required
+@site_admin_required
 def video_delete(request, pk):
     video = get_object_or_404(LessonVideo, pk=pk)
     lesson = video.lesson

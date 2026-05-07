@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin-panel/courses/<int:course_id>/lessons/<int:lesson_id>/edit/', views.lesson_edit, name='lesson_edit'),
     path('admin-panel/courses/<int:course_id>/lessons/<int:lesson_id>/delete/', views.lesson_delete, name='lesson_delete'),
     path('admin-panel/lessons/<int:lesson_pk>/videos/add/', views.video_add, name='video_add'),
+    path('admin-panel/videos/<int:pk>/update/', views.video_update, name='video_update'),
     path('admin-panel/videos/<int:pk>/delete/', views.video_delete, name='video_delete'),
     path('admin-panel/lessons/<int:lesson_pk>/videos/presign/', views.video_presign, name='video_presign'),
     path('admin-panel/lessons/<int:lesson_pk>/videos/confirm/', views.video_confirm, name='video_confirm'),
