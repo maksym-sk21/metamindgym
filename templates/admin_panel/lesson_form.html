@@ -170,7 +170,6 @@
 <script>
 const PRESIGN_URL = "{% url 'accounts:video_presign' lesson.pk %}";
 const CONFIRM_URL = "{% url 'accounts:video_confirm' lesson.pk %}";
-const CSRF = "{{ csrf_token }}";
 
 async function startUpload() {
     const title       = document.getElementById('video-title').value.trim();
@@ -257,8 +256,11 @@ function uploadToR2(url, file, onProgress) {
         xhr.send(file);
     });
 }
+</script>
 
+<script>
 const VIDEO_UPDATE_URL = (pk) => `/admin-panel/videos/${pk}/update/`;
+const CSRF_TOKEN = "{{ csrf_token }}";
 
 function toggleEditForm(pk) {
     const form = document.getElementById(`vedit-${pk}`);
@@ -279,12 +281,11 @@ async function saveVideo(pk) {
     try {
         const resp = await fetch(VIDEO_UPDATE_URL(pk), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
             body: JSON.stringify({ title, description }),
         });
         if (!resp.ok) throw new Error('Ошибка сервера');
 
-        // Обновляем текст в строке без перезагрузки
         document.getElementById(`vtitle-${pk}`).textContent = title;
         const descEl = document.getElementById(`vdesc-${pk}`);
         if (descEl) descEl.textContent = description;
@@ -300,13 +301,20 @@ async function saveVideo(pk) {
         status.classList.replace('text-gray-400', 'text-red-400');
     }
 }
+</script>
 
+{% if lesson %}
+<script>
+const PRESIGN_URL = "{% url 'accounts:video_presign' lesson.pk %}";
+const CONFIRM_URL = "{% url 'accounts:video_confirm' lesson.pk %}";
+const CSRF = CSRF_TOKEN;
+
+function addVideoRow(title, description, key, order) {
     let list = document.getElementById('video-list');
     if (!list) {
         list = document.createElement('div');
         list.id = 'video-list';
         list.className = 'space-y-3 mb-6';
-        // Вставляем перед разделителем
         const border = document.querySelector('.border-t.border-border-main.pt-5');
         border.parentNode.insertBefore(list, border);
     }
