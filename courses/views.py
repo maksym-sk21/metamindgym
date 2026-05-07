@@ -17,6 +17,25 @@ def get_user_accessible_courses(user):
     )
 
 
+def free_lesson_view(request):
+    course = get_object_or_404(Course, course_type='free', is_active=True)
+    lesson = course.lessons.filter(is_active=True).first()
+    if not lesson:
+        return render(request, 'courses/lesson_view.html', {
+            'course': course,
+            'lesson': None,
+            'lessons': [],
+            'is_free_preview': True,
+        })
+    lessons = course.lessons.filter(is_active=True)
+    return render(request, 'courses/lesson_view.html', {
+        'course': course,
+        'lesson': lesson,
+        'lessons': lessons,
+        'is_free_preview': True,
+    })
+
+
 @login_required
 def course_detail(request, course_id):
     course = get_object_or_404(Course, id=course_id, is_active=True)
