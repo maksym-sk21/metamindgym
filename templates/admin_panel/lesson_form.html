@@ -321,6 +321,7 @@ function addVideoRow(title, description, key, order) {
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between bg-surface-2 border border-border-main rounded-xl px-3 sm:px-4 py-3 gap-3';
     row.innerHTML = `
+{% verbatim %}
         <div class="flex items-center gap-3 min-w-0">
             <span class="text-gray-400 text-xs font-mono w-5 shrink-0">${order}</span>
             <div class="min-w-0">
@@ -330,6 +331,7 @@ function addVideoRow(title, description, key, order) {
             </div>
         </div>
         <span class="text-green-500 text-xs shrink-0 font-medium">✓ загружено</span>
+{% endverbatim %}
     `;
     list.appendChild(row);
 }
