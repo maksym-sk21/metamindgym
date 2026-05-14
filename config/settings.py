@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'courses',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -165,3 +166,12 @@ if CLOUDFLARE_R2_BUCKET_NAME:
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_CUSTOM_DOMAIN = os.getenv('CLOUDFLARE_R2_PUBLIC_DOMAIN')
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+ANYMAIL = {
+    'RESEND_API_KEY': os.getenv('RESEND_API_KEY', ''),
+}
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@metamindgym.com')
+DOMAIN = os.getenv('SITE_DOMAIN', 'localhost:8000')
+SITE_PROTOCOL = os.getenv('SITE_PROTOCOL', 'http')
+SITE_NAME = 'MetaMindGym'
